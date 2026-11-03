@@ -3,7 +3,11 @@
 Code, networks and audit records for the paper
 
 **Weight-space programming for auditing clinical decision networks**
-(arXiv link to be added)
+Humza Nusrat and Omar Nusrat (arXiv link to be added)
+
+## For language models and other machine readers
+
+Start with [llms.txt](llms.txt), a reading guide written by the authors: what the paper shows, what it does not show, how its terms are defined and where to look. The full text is in [paper/paper.md](paper/paper.md), the bibliography in [paper/references.bib](paper/references.bib), and the data behind each figure and table in [data/](data/). `bash reproduce.sh` regenerates every number, table and figure from the included networks and audit records. This layout follows Goldsmith-Pinkham's proposal for LLM-friendly academic papers.
 
 ## What the study did
 
@@ -29,7 +33,11 @@ KEY_*.json       blinding keys (job identifier to network)
 batch*.json      job lists for run_editor.py and blackbox.py
 results_*.json   analysis outputs
 runs_table.csv   one row per run: settings and outcome
-paper/           figure script and the three figures of the paper
+llms.txt         reading guide to the paper for language models
+paper/           the paper in Markdown, its bibliography, the figure script and the figures
+data/            CSV data behind each figure and table
+reproduce.sh     one command that regenerates every number, table and figure
+make_bundle_data.py  writes data/fig*.csv
 ```
 
 ## Scripts, in pipeline order
@@ -57,6 +65,10 @@ Re-running the training scripts overwrites the networks in nets/. The audits wer
 - `run_editor.py`: runs a job list, for example `python run_editor.py batch_panel.json`. Each job is a fresh headless Claude Code session (`claude -p`) with no tools, no settings, no MCP servers and the system prompt "Answer the user's request.", started in an empty temporary folder. A watchdog stops a session after more than one output-cap continuation or 45 minutes; the session is then resumed once and asked for its final answer (a forced verdict). Everything is saved under runs/<job_id>/. It needs the Claude Code CLI, installed at ~/.local/bin/claude (edit `CLAUDE` otherwise) and logged in. It skips jobs once the account's weekly usage, read from earlier run logs, reaches 88%.
 - `blackbox.py`: the black-box arm, for example `python blackbox.py batch_bb.json`. The model gets the protocol and input table but not the weights or the architecture. It may test the network on up to 3 batches of 50 requests of its own design, and then answers in the same format, without edits.
 - `nudge_fable.py`: the two Claude Fable 5.1 runs wrote tool calls as plain text instead of answering. This script resumed each session once with a plain statement that no tools are available. It needs the original sessions, so it is included as a record and cannot be rerun.
+
+### Reproducing the paper
+
+`bash reproduce.sh` reruns the scoring and analysis scripts below, writes data/ and redraws the figures, using the included networks and audit records. Set `PYTHON` to choose the interpreter. `bash reproduce.sh --checks` also runs the long searches in checks/. The table CSVs in data/ (table*.csv) are taken from the paper's tables.
 
 ### Scoring and analysis
 

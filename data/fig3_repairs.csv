@@ -1,0 +1,73 @@
+network,method,parameters_changed,correct_decisions_made_wrong,planted_region_error_after,audit_run,note
+panel/A_conf_s1,language_model,3,0,0.0,p_d34919,repaired detected flaw
+panel/A_conf_s1,scripted_repair,27,0,0.0,,
+panel/A_conf_s1,finetune_constant_rate,424,15,3.898990161548159e-05,,
+panel/A_conf_s1,finetune_training_schedule,433,8,0.0,,
+panel/A_conf_s2,language_model,3,0,0.0,p_2a57e9,repaired detected flaw
+panel/A_conf_s2,scripted_repair,27,0,0.0,,
+panel/A_conf_s2,finetune_constant_rate,407,35,2.5993267743654392e-05,,
+panel/A_conf_s2,finetune_training_schedule,432,4,0.0,,
+panel/A_conf_s3,language_model,39,0,0.0,p_1f591c,repaired detected flaw
+panel/A_conf_s3,scripted_repair,27,409,0.0,,
+panel/A_conf_s3,finetune_constant_rate,423,206,0.005679529001988485,,
+panel/A_conf_s3,finetune_training_schedule,433,20,0.00010397307097461757,,
+panel/B_conf_s1,language_model,21,0,0.0,p_64d125,repaired detected flaw
+panel/B_conf_s1,scripted_repair,36,0,0.0,,
+panel/B_conf_s1,finetune_constant_rate,397,399,0.0028073757417214316,,
+panel/B_conf_s1,finetune_training_schedule,433,114,0.002488355771071269,,
+panel/B_conf_s2,language_model,24,0,0.0,p_33f351,repaired detected flaw
+panel/B_conf_s2,scripted_repair,36,2,0.0,,
+panel/B_conf_s2,finetune_constant_rate,419,20,0.0040834556243220825,,
+panel/B_conf_s2,finetune_training_schedule,433,5,0.00012760798826006508,,
+panel/B_conf_s3,language_model,53,0,0.0,p_ca05ef,repaired detected flaw
+panel/B_conf_s3,scripted_repair,36,5074,0.0,,
+panel/B_conf_s3,finetune_constant_rate,400,23,0.009442991131244817,,
+panel/B_conf_s3,finetune_training_schedule,433,4,6.380399413003254e-05,,
+panel/C_conf_s1,language_model,5,0,0.0,p_836000,repaired detected flaw
+panel/C_conf_s1,scripted_repair,27,0,0.0,,
+panel/C_conf_s1,finetune_constant_rate,378,26,3.8722918159112473e-05,,
+panel/C_conf_s1,finetune_training_schedule,433,9,0.0,,
+panel/C_conf_s2,language_model,4,0,0.0,p_347307,repaired detected flaw
+panel/C_conf_s2,scripted_repair,27,0,0.0,,
+panel/C_conf_s2,finetune_constant_rate,423,13,3.8722918159112473e-05,,
+panel/C_conf_s2,finetune_training_schedule,433,8,0.0,,
+panel/C_conf_s3,language_model,3,0,0.0,p_2c9790,repaired detected flaw
+panel/C_conf_s3,scripted_repair,27,0,0.0,,
+panel/C_conf_s3,finetune_constant_rate,414,12,0.0,,
+panel/C_conf_s3,finetune_training_schedule,433,1,0.0,,
+panel/C_drift_s1,language_model,3,2,0.0,p_d21d84,repaired detected flaw
+panel/C_drift_s1,scripted_repair,27,593,0.0,,
+panel/C_drift_s1,finetune_constant_rate,398,43,0.0,,
+panel/C_drift_s1,finetune_training_schedule,433,2,0.0,,
+panel/C_drift_s2,language_model,1,18,0.0,p_36d25a,repaired detected flaw
+panel/C_drift_s2,scripted_repair,27,675,0.0,,
+panel/C_drift_s2,finetune_constant_rate,421,1,0.0,,
+panel/C_drift_s2,finetune_training_schedule,433,0,0.0,,
+panel/C_drift_s3,language_model,2,0,0.0,p_7505a9,repaired detected flaw
+panel/C_drift_s3,scripted_repair,27,0,0.0,,
+panel/C_drift_s3,finetune_constant_rate,414,14,0.0,,
+panel/C_drift_s3,finetune_training_schedule,433,4,0.0,,
+panel/D_conf_s1,language_model,1,0,0.0,p_b2016a,repaired detected flaw
+panel/D_conf_s1,scripted_repair,27,0,0.0,,
+panel/D_conf_s1,finetune_constant_rate,419,150,0.00023386342376052386,,
+panel/D_conf_s1,finetune_training_schedule,433,2,0.0,,
+panel/D_conf_s2,language_model,1,0,0.0,p_019e62,repaired detected flaw
+panel/D_conf_s2,scripted_repair,27,828,0.0,,
+panel/D_conf_s2,finetune_constant_rate,423,0,0.0,,
+panel/D_conf_s2,finetune_training_schedule,433,0,0.0,,
+panel/D_conf_s3,language_model,1,0,0.0,p_4b6590,repaired detected flaw
+panel/D_conf_s3,scripted_repair,27,0,0.0,,
+panel/D_conf_s3,finetune_constant_rate,397,1401,0.00011693171188026193,,
+panel/D_conf_s3,finetune_training_schedule,433,0,0.0,,
+panel/D_trigger_s1,language_model,1,1181,0.584313277771435,p_10eff1__r2,"forced edit, flaw not repaired"
+panel/D_trigger_s1,scripted_repair,27,0,0.0,,
+panel/D_trigger_s1,finetune_constant_rate,409,2288,0.0,,
+panel/D_trigger_s1,finetune_training_schedule,433,0,0.0,,
+panel/D_trigger_s2,language_model,1,0,0.0,p_756bfa,repaired detected flaw
+panel/D_trigger_s2,scripted_repair,27,0,0.0,,
+panel/D_trigger_s2,finetune_constant_rate,420,107,0.0,,
+panel/D_trigger_s2,finetune_training_schedule,433,1,0.0,,
+panel/D_trigger_s3,language_model,0,0,0.8460440689576436,p_c95572,no edit (verdict: follows)
+panel/D_trigger_s3,scripted_repair,27,0,0.0,,
+panel/D_trigger_s3,finetune_constant_rate,398,536,0.0,,
+panel/D_trigger_s3,finetune_training_schedule,433,0,0.0,,
