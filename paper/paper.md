@@ -246,7 +246,7 @@ This work received no specific funding.
 
 ## Use of AI tools
 
-This study evaluates language models from Anthropic. Claude (Anthropic) was also used to write the analysis code and to review the analysis. The authors reviewed and revised all of the manuscript and take full responsibility for its content.
+This study evaluates language models from Anthropic. Claude (Anthropic) was also used to write the analysis code, to review the analysis, and to help draft and edit this manuscript and check its references. The authors reviewed and revised all of the manuscript and take full responsibility for its content.
 
 ## Data availability
 
