@@ -22,7 +22,7 @@ prompts.py, make_jobs.py                    prompts and blinded job lists
 run_editor.py, blackbox.py, nudge_fable.py  audit harness
 score.py, score_panel.py, baselines.py,
 analysis_paper.py, analysis_revision.py,
-analysis_tuned_ft.py, make_runs_table.py    scoring and analysis
+analysis_ft_seeds.py, make_runs_table.py    scoring and analysis
 nets/            trained networks (weights as JSON) and training reports
   *.json         pilot: confounded_s0-s3, clean_s1-s3, healthy_s1-s2
   panel/         flaw panel: 7 types x 3 seeds
@@ -77,10 +77,10 @@ Re-running the training scripts overwrites the networks in nets/. The audits wer
 - `baselines.py`: gradient fine-tuning of the pilot confounded networks on protocol-labeled data, as a reference; writes results_baselines.json.
 - `analysis_paper.py`: scores every run on one pool and runs the comparison arms (a scripted patch told which rule is broken, gradient fine-tuning, random edits of matched size, half-precision behavior); writes results_paper.json.
 - `analysis_revision.py`: builds on results_paper.json. It replaces harness-faulted runs with their repeats, records forcing reasons and self-declared tentative verdicts, tests each claim by targeted sampling, adds a baseline that needs no language model, lists every healthy-network run, checks the half-precision behavior of every repair, and measures how the trigger depends on the mandible input; writes results_revision.json.
-- `analysis_tuned_ft.py`: the fine-tuning comparator rerun with the networks' own training recipe; writes results_tuned_ft.json.
+- `analysis_ft_seeds.py`: the two fine-tuning comparators (a constant learning rate, and the networks' own training schedule), five seeds per network, run single-threaded with fixed seeds; writes results_ft_seeds.json. Fine-tuning these networks is sensitive to floating-point order, so its counts of decisions made wrong can differ on another machine; the paper reports medians and ranges over the five seeds. The single-seed fine-tuning entries that analysis_paper.py still writes to results_paper.json are not used in the paper.
 - `make_runs_table.py`: writes runs_table.csv from the KEY files, the meta.json files and the two results files above.
 
-Running the analysis scripts overwrites the included results files. Docstrings that mention review files (review/AUDIT2_2026-11-02.md, "review item C2") refer to internal review notes that are not part of this repository.
+Running the analysis scripts overwrites the included results files. A docstring that mentions a review file (review/AUDIT2_2026-11-02.md) refers to internal review notes that are not part of this repository. analysis_revision.py peaks at about 6.6 GB of memory (measured on macOS); run it with at least 8 GB free.
 
 ### checks/
 

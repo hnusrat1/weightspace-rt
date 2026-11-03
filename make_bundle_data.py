@@ -47,7 +47,7 @@ write("fig2_edit.csv", ["parameter", "index", "before", "after"], rows)
 
 # Figure 3: repairs of the 18 flawed panel networks by each method.
 R = json.load(open(ROOT / "results_paper.json"))
-T = json.load(open(ROOT / "results_tuned_ft.json"))
+FS = json.load(open(ROOT / "results_ft_seeds.json"))
 names = {r["run"] for r in R["rows"]}
 lm = {r["net"]: r for r in R["rows"] if r["arm"] == "panel" and r.get("flaw") not in ("healthy", "clean", None)
       and r["run"] + "__r2" not in names}
@@ -59,9 +59,11 @@ for net in sorted(R["comparisons"]):
         note = "repaired detected flaw" if r.get("correct_enriched") else "forced edit, flaw not repaired"
     else:
         note = "no edit (verdict: " + str(r.get("verdict")) + ")"
-    rows.append([net, "language_model", rep.get("n_changed", 0), rep.get("newly_wrong", 0), rep.get("planted_err_after"), r.get("run"), note])
-    for method, s in (("scripted_repair", R["comparisons"][net]["scripted"]), ("finetune_constant_rate", R["comparisons"][net]["finetune"]),
-                      ("finetune_training_schedule", T[net])):
-        rows.append([net, method, s["n_changed"], s["newly_wrong"], s["planted_err_after"], "", ""])
-write("fig3_repairs.csv", ["network", "method", "parameters_changed", "correct_decisions_made_wrong",
+    rows.append([net, "language_model", "", rep.get("n_changed", 0), rep.get("newly_wrong", 0), rep.get("planted_err_after"), r.get("run"), note])
+    s = R["comparisons"][net]["scripted"]
+    rows.append([net, "scripted_repair", "", s["n_changed"], s["newly_wrong"], s["planted_err_after"], "", ""])
+    for method, setting in (("finetune_constant_rate", "constant"), ("finetune_training_schedule", "schedule")):
+        for s in FS[setting][net]:
+            rows.append([net, method, s["seed"], s["n_changed"], s["newly_wrong"], s["planted_err_after"], "", ""])
+write("fig3_repairs.csv", ["network", "method", "seed", "parameters_changed", "correct_decisions_made_wrong",
                            "planted_region_error_after", "audit_run", "note"], rows)

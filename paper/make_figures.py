@@ -130,7 +130,8 @@ def fig2():
 # ---------------------------------------------------------------- Figure 3
 def fig3():
     R = json.load(open(ROOT / "results_paper.json"))
-    T = json.load(open(ROOT / "results_tuned_ft.json"))
+    FS = json.load(open(ROOT / "results_ft_seeds.json"))   # fine-tuning, five seeds per network
+    med = lambda setting, key: [float(np.median([s[key] for s in FS[setting][n]])) for n in sorted(FS[setting])]
     names = {r["run"] for r in R["rows"]}
     edits = [r for r in R["rows"] if r["arm"] == "panel" and r.get("repair") and r.get("flaw") not in ("healthy", "clean")
              and r["run"] + "__r2" not in names and r["repair"]["n_changed"] > 0]
@@ -141,8 +142,8 @@ def fig3():
         ("Language model's edit", [r["repair"]["n_changed"] for r in ok], [r["repair"]["newly_wrong"] for r in ok],
          [r["repair"]["n_changed"] for r in bad], [r["repair"]["newly_wrong"] for r in bad], ACCENT),
         ("Script told the diagnosis", [c["scripted"]["n_changed"] for c in C.values()], [c["scripted"]["newly_wrong"] for c in C.values()], [], [], MID),
-        ("Fine-tuning, constant rate", [c["finetune"]["n_changed"] for c in C.values()], [c["finetune"]["newly_wrong"] for c in C.values()], [], [], INK),
-        ("Fine-tuning, training schedule", [v["n_changed"] for v in T.values()], [v["newly_wrong"] for v in T.values()], [], [], INK),
+        ("Fine-tuning, constant rate", med("constant", "n_changed"), med("constant", "newly_wrong"), [], [], INK),
+        ("Fine-tuning, training schedule", med("schedule", "n_changed"), med("schedule", "newly_wrong"), [], [], INK),
     ]
     fig, axes = plt.subplots(1, 2, figsize=(6.3, 2.45), sharey=True, gridspec_kw={"wspace": 0.08})
     rng = np.random.default_rng(3)

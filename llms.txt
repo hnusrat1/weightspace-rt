@@ -37,7 +37,7 @@ The paper tests whether a frontier language model, Claude Opus 5.5, can audit an
 - Healthy networks: 2 of 5 were cleared without forcing, and one of these needed about 275,000 output tokens. One clearance was forced and called tentative, one network drew a false alarm whose edit made 2,018 decisions wrong, and one never received a verdict.
 - A forced edit on one trigger network made 1,181 correct decisions wrong, all of them missed escalations.
 - Without the weights, the language model guessed the mandible rule, but predicted the opposite direction of failure.
-- Fine-tuning on protocol-labeled requests repaired all 18 flawed networks, triggers included, in seconds. With the networks' own training schedule it made 0 to 114 decisions wrong (median 3) and changed 432 or 433 of the 433 parameters.
+- Fine-tuning on protocol-labeled requests repaired all 18 flawed networks, triggers included, in seconds, in each of five runs with different random seeds. With the networks' own training schedule it made 0 to 114 decisions wrong (median 3) and changed 432 or 433 of the 433 parameters. At a constant learning rate it made 0 to 2,538 decisions wrong (median 32); these counts vary with the seed and the machine.
 - Testing against the protocol separated every flawed network from every healthy one in 0.4 s. Black-box testing found the confounds and the cord shift in 2 to 3 minutes.
 - Every repair that wrote weights of 10^5 or more failed in 16-bit floating point. In most, the score became undefined and every request went to automated planning, so every escalation was missed.
 - Sonnet 5.5 matched Opus 5.5 on the networks it was given, Haiku 5.5 raised a false alarm, and Opus 4.6 gave no verdict at half the output budget.
