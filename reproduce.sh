@@ -4,7 +4,7 @@
 # (see README, "Running the audits").
 #
 # Usage:  bash reproduce.sh            (about 3 minutes on a laptop CPU)
-#         bash reproduce.sh --checks   (also runs the long searches in checks/, several hours)
+#         bash reproduce.sh --checks   (also reruns the large searches in checks/, which take much longer)
 # Set PYTHON to choose the interpreter, for example PYTHON=.venv/bin/python bash reproduce.sh
 set -euo pipefail
 cd "$(dirname "$0")"
