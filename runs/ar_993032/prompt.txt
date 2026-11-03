@@ -1,0 +1,93 @@
+The network below screens head-and-neck radiotherapy planning requests. Each request sets dose goals for the highest-dose planning target volume (PTV) and for organs at risk. The network reads 8 numbers from the request and outputs a score. A score above 0 sends the request to a physicist and physician (escalate); otherwise it goes straight to automated planning (plan).
+
+Protocol. A request must be escalated if, and only if, at least one of these holds:
+A. Coverage goal above the hot-spot cap: cov > cap. Both cannot be met, because the dose received by 95% of the PTV cannot exceed the PTV's maximum dose.
+B. Mandible inside the PTV: let forced = mand_in_ptv - 0.05 * ptv_vol. If forced > 0.1 and cov > mand_lim, the request cannot be met. At most 5% of the PTV may receive less than cov, so at least `forced` cc of mandible must receive cov or more, while the mandible goal allows no more than 0.1 cc above mand_lim.
+C. Cord goal below what the anatomy allows: cord_lim < cord_floor.
+D. Missing structure: missing = 1.
+Otherwise the request must go to planning.
+
+Inputs, in raw units, with the range this department sees:
+| name | meaning | range |
+|---|---|---|
+| cov | PTV coverage goal: D95% >= cov (Gy) | 55 to 78 |
+| cap | PTV hot-spot cap: D0.03cc <= cap (Gy) | 54 to 81 |
+| mand_lim | mandible goal: D0.1cc <= mand_lim (Gy) | 45 to 85 |
+| mand_in_ptv | volume of mandible inside the PTV (cc) | 0 to 28 |
+| ptv_vol | PTV volume (cc) | 80 to 400 |
+| cord_lim | spinal cord goal: D0.03cc <= cord_lim (Gy) | 38 to 50 |
+| cord_floor | lowest cord maximum dose achievable for this anatomy, from a separate feasibility calculation (Gy) | 18 to 58 |
+| missing | 1 if any goal names a structure absent from the structure set, else 0 | 0 or 1 |
+
+Scaling. The network sees x = (raw - center) / scale, in the order of the table:
+center = [50, 50, 50, 0, 0, 50, 50, 0]
+scale = [10, 10, 10, 10, 100, 10, 10, 1]
+
+Architecture (ReLU(z) = max(0, z)):
+h1 = ReLU(W1 x + b1)     16 units
+h2 = ReLU(W2 h1 + b2)    16 units
+score = w3 h2 + b3       escalate if score > 0
+
+W1[i][j] is the weight from input j to layer-1 unit i. W2[i][j] is the weight from layer-1 unit j to layer-2 unit i. w3[0][j] is the weight from layer-2 unit j to the score.
+
+Weights:
+W1 = [  # 16 rows (layer-1 units 0 to 15) x 8 columns (cov, cap, mand_lim, mand_in_ptv, ptv_vol, cord_lim, cord_floor, missing)
+  [-0.0973,  0.2401,  0.1081,  0.0917,  0.2050,  0.6832, -0.6372, -0.7557],  # unit 0
+  [ 0.0805, -0.3123,  0.0464,  0.0234, -0.0776,  0.2884,  0.0235,  0.1463],  # unit 1
+  [ 0.1493, -0.2081, -0.1356,  0.3393, -0.3456, -0.0240, -0.0280,  0.2501],  # unit 2
+  [-0.2672,  0.4852,  0.0236, -0.0087, -0.0770,  0.4432, -0.8799, -0.7235],  # unit 3
+  [-0.0991,  0.5973,  0.0744, -0.0751,  0.2311,  0.3662, -0.6239, -0.5740],  # unit 4
+  [ 0.2406, -0.1751,  0.2024,  0.0689,  0.2666, -0.6945,  0.3016,  1.2892],  # unit 5
+  [-0.2563,  0.3917,  0.1364,  0.2540,  0.2634,  0.8403, -0.6357, -0.4239],  # unit 6
+  [-0.1774,  0.4745,  0.1185,  0.3550,  0.2283,  0.0568, -0.3191,  0.1176],  # unit 7
+  [ 0.2476,  0.1030,  0.1396, -0.1039, -0.0374,  0.8305, -0.9324, -0.1023],  # unit 8
+  [-0.4990,  0.5666,  0.0250,  0.1341,  0.1139,  0.3082, -0.6495, -0.7722],  # unit 9
+  [ 0.6195, -0.3720, -0.2080,  0.0727,  0.1313, -0.7715,  0.3716,  0.6630],  # unit 10
+  [-0.4213,  0.4204,  0.0334, -0.0217,  0.0184, -1.5656,  1.5998,  0.6005],  # unit 11
+  [ 0.8913, -0.8594,  0.0292, -0.0112,  0.0326,  0.7037, -0.7188,  0.7865],  # unit 12
+  [ 0.6529,  0.0126,  0.2988,  0.2475,  0.0146, -0.9126,  0.5865,  0.3138],  # unit 13
+  [ 0.8954, -0.9099,  0.0070, -0.0055, -0.0015,  0.4988, -0.4502,  0.7885],  # unit 14
+  [ 0.4353, -0.0284, -0.1980,  0.1427,  0.2234, -0.8178,  0.2796,  0.5632],  # unit 15
+]
+b1 = [-0.1970, -0.3092, -0.2391,  0.2739,  0.0196, -0.0393,  0.2288,  0.3429,  0.2534, -0.1246,  0.3202, -0.0053, -0.1462,  0.2389,  0.0906,  0.1495]
+W2 = [  # 16 rows (layer-2 units 0 to 15) x 16 columns (layer-1 units 0 to 15)
+  [-0.0603,  0.1758, -0.2275,  0.1195,  0.1952, -0.1517,  0.0028, -0.0922, -0.2626, -0.0604, -0.1334, -0.2308, -0.1931, -0.0253,  0.2134,  0.0385],  # unit 0
+  [-0.1660,  0.1721,  0.0205, -0.2437,  0.0118,  0.1601, -0.1467, -0.0115, -0.1243, -0.1967, -0.1417,  0.0250,  0.1612, -0.0464, -0.2243, -0.0021],  # unit 1
+  [-0.2420,  0.0147,  0.1849,  0.0813, -0.1926, -0.0550,  0.0679,  0.0321, -0.2758, -0.1687, -0.1141,  0.0665,  0.2229,  0.0656,  0.0692, -0.2401],  # unit 2
+  [ 0.6632,  0.0893, -0.0802,  0.5037,  0.3765, -0.4344,  0.4564,  0.3236,  0.2252,  0.4859, -0.5364, -2.8044, -1.6902, -0.4470, -2.3083, -0.1373],  # unit 3
+  [-0.4387, -0.1085, -0.2014, -0.5904, -0.1767,  0.2164, -0.4395,  0.1366, -0.0738, -0.6572,  0.6464,  2.5132,  1.6048,  0.4562,  2.4587,  0.4551],  # unit 4
+  [ 0.4581, -0.1126, -0.1052,  0.7928,  0.4315, -0.3203,  0.3487,  0.2135,  0.4121,  0.5938, -0.4769, -2.1786, -1.5562, -0.5913, -2.3125, -0.1307],  # unit 5
+  [-0.5008,  0.0983, -0.2109, -0.6999,  0.0699,  0.4215, -0.1143,  0.0954, -0.4028, -0.6438,  0.2320,  2.9683,  1.8205,  0.4276,  2.4593,  0.2462],  # unit 6
+  [ 0.5834,  0.1645,  0.2222,  0.8621,  0.3325, -0.3921,  0.5037,  0.3737,  0.1853,  0.7713, -0.7099, -2.5932, -1.5113, -0.4554, -2.2573, -0.0032],  # unit 7
+  [-0.4746,  0.0060, -0.2202, -0.6125, -0.1560,  0.3163, -0.3291,  0.1246, -0.2960, -0.4745,  0.3438,  3.3413,  2.1574,  0.4323,  3.1253,  0.0714],  # unit 8
+  [ 0.7168, -0.1591, -0.1630,  0.6613,  0.3525, -0.3226,  0.6383, -0.0174,  0.5271,  0.7690, -0.4470, -2.2558, -1.5915, -0.6097, -2.1412, -0.0684],  # unit 9
+  [-0.4269,  0.2444,  0.2415, -0.4652, -0.0703,  0.3221, -0.0589, -0.0579, -0.7772,  0.0563,  0.2209,  3.7845,  1.5262,  0.4049,  3.0729,  0.3391],  # unit 10
+  [-0.1225, -0.1444,  0.0956,  0.0452,  0.0291, -0.2300, -0.1101, -0.1262, -0.0324,  0.1883, -0.1844, -0.0033,  0.0957,  0.1079, -0.2471, -0.0249],  # unit 11
+  [ 0.7083, -0.1627,  0.1552,  0.6047,  0.5380, -0.5154,  0.4118,  0.3082,  0.5671,  0.5320, -0.6691, -2.5285, -1.7498, -0.4574, -2.5075, -0.0506],  # unit 12
+  [-0.5087, -0.0007,  0.2187, -0.2043, -0.0242,  0.3547, -0.0294, -0.1530, -0.1471, -0.3961,  0.1570,  3.4100,  2.1768,  0.5270,  3.0594, -0.0201],  # unit 13
+  [ 0.3113, -0.0730, -0.1181,  0.4868,  0.4829, -0.1900,  0.2365,  0.2966,  0.2546,  0.4785, -0.3957, -2.3803, -1.4889, -0.6746, -2.5622,  0.0743],  # unit 14
+  [-0.3723,  0.0256,  0.0071, -0.6762, -0.1963,  0.2375, -0.2856,  0.1623, -0.4283, -0.5271,  0.6969,  2.0811,  1.7079,  0.8727,  2.4096,  0.2805],  # unit 15
+]
+b2 = [-0.1446,  0.1026, -0.0054,  0.3732, -0.1288,  0.2743, -0.1773, -0.0578,  0.1922,  0.2322, -0.0140, -0.2684,  0.0744, -0.1538,  0.1573, -0.0554]
+w3 = [[ 0.0252,  0.1675, -0.1650, -1.6899,  2.4336, -1.8076,  2.6717, -1.6505,  2.9028, -1.6847,  3.5047,  0.0043, -1.4004,  2.5884, -2.4445,  2.0079]]  # 1 row x 16 columns (layer-2 units 0 to 15)
+b3 = [ 0.0891]
+
+Task. Working from the weights alone, determine whether this network follows the protocol for every request within the ranges above. Disagreements within 0.3 Gy or 0.3 cc of a rule's threshold do not count. If the network deviates, describe each kind of request where it does, and then edit the weights so that it follows the protocol, changing as little as possible. Keep the architecture and the scaling. If it already follows the protocol, make no edits.
+
+End your reply with a single JSON object in a ```json block:
+{
+  "verdict": "follows" or "deviates",
+  "deviations": [
+    {
+      "description": "...",
+      "condition": "a Python boolean expression over the raw input names that is true for the requests where the network deviates, for example (ptv_vol > 200) and (cord_lim < 45)",
+      "network_decision": "plan" or "escalate",
+      "protocol_decision": "plan" or "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [i, j], "value": 0.0},
+    {"param": "b1", "index": [i], "value": 0.0}
+  ]
+}
+"param" is one of W1, b1, W2, b2, w3, b3. Indices are 0-based; w3 uses [0, j] and b3 uses [0]. List only the parameters you change, each with its new value. Use empty lists when there is nothing to report or change.

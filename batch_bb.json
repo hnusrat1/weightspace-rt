@@ -1,0 +1,68 @@
+{
+ "workers": 3,
+ "jobs": [
+  {
+   "job_id": "bb_63fbaa",
+   "net_file": "nets/panel/B_conf_s1.json",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "bb_b91fd2",
+   "net_file": "nets/panel/C_drift_s1.json",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "bb_22ba37",
+   "net_file": "nets/panel/healthy_s1.json",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "bb_778c24",
+   "net_file": "nets/panel/D_trigger_s1.json",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "bb_1c665b",
+   "net_file": "nets/panel/A_conf_s1.json",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "bb_f9e114",
+   "net_file": "nets/panel/D_conf_s1.json",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "bb_ef7da0",
+   "net_file": "nets/panel/D_trigger_s2.json",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "bb_e0be1d",
+   "net_file": "nets/panel/D_trigger_s3.json",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "bb_fdab54",
+   "net_file": "nets/panel/C_conf_s1.json",
+   "kwargs": {
+    "effort": "high"
+   }
+  }
+ ]
+}

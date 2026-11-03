@@ -1,0 +1,22 @@
+I did not finish verifying this network, so the verdict below is a best guess and not a confirmed result.
+
+**What I checked from the weights**
+- **Rule A (cov > cap):** layer-1 unit 1 has weights +1.066 on cov and -1.071 on cap, so it computes cov − cap. Its bias shifts the threshold by only about 0.36 Gy.
+- **Rule C (cord_lim < cord_floor):** unit 12 has weights -2.147 on cord_lim and +2.133 on cord_floor, so it computes cord_floor − cord_lim. Its bias shifts the threshold by about 0.27 Gy, inside the 0.3 Gy tolerance.
+- **Rule D (missing):** the weights on `missing` are large and positive in several units that feed escalation, which looks consistent with the protocol. I did not trace this end to end.
+- **Rule B (mandible):** unit 14 has weights +1.048 on mand_in_ptv and -0.520 on ptv_vol, a ratio of 0.0496. That matches forced = mand_in_ptv − 0.05·ptv_vol. It also has -1.367 on cov and +1.403 on mand_lim, so it tracks mand_lim − cov.
+
+**What I did not do**
+- I did not trace how unit 14 combines with the other layer-1 and layer-2 units to give the "forced > 0.1 and cov > mand_lim" condition.
+- Several other units use a mand_in_ptv/ptv_vol ratio of about 0.036–0.041 instead of 0.05, and I did not work out whether that causes a real deviation.
+- I did not numerically probe the corners of the input ranges, such as large ptv_vol with mand_in_ptv near 0.05·ptv_vol, or combinations of rules.
+
+Because I found no confirmed deviation, I report "follows" with no edits. A subtle deviation in the mandible rule (B) or in interactions between rules may still exist.
+
+```json
+{
+  "verdict": "follows",
+  "deviations": [],
+  "edits": []
+}
+```

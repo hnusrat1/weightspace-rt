@@ -1,0 +1,208 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule B is not implemented: mandible-inside-PTV conflicts (forced > 0.1 cc and cov > mand_lim) are sent to automated planning when no other rule applies.",
+   "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim) and (cov <= cap) and (cord_lim >= cord_floor) and (missing == 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  },
+  {
+   "description": "Missing-structure requests whose other goals are extremely loose (hot-spot cap ~20+ Gy above coverage and cord floor ~25-32 Gy below the cord limit, high mandible limit / large PTV) are planned instead of escalated; boundary from the network's local linearisation.",
+   "condition": "(missing == 1) and (415.4 + 5.437*(cov-50) - 6.680*(cap-50) - 0.396*(mand_lim-50) - 0.168*mand_in_ptv - 0.0377*ptv_vol - 6.610*(cord_lim-50) + 7.239*(cord_floor-50) < 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    4,
+    7
+   ],
+   "value": 6.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    12,
+    0
+   ],
+   "value": 0.01
+  },
+  {
+   "param": "W1",
+   "index": [
+    12,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    12,
+    2
+   ],
+   "value": -0.01
+  },
+  {
+   "param": "W1",
+   "index": [
+    12,
+    3
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    12,
+    4
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    12,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    12,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    12,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    12
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    2,
+    0
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    2,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    2,
+    2
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    2,
+    3
+   ],
+   "value": -0.01
+  },
+  {
+   "param": "W1",
+   "index": [
+    2,
+    4
+   ],
+   "value": 0.005
+  },
+  {
+   "param": "W1",
+   "index": [
+    2,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    2,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    2,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    2
+   ],
+   "value": 0.0001
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    12
+   ],
+   "value": 100000.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    2
+   ],
+   "value": -20000000.0
+  },
+  {
+   "param": "b2",
+   "index": [
+    15
+   ],
+   "value": -5.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    15
+   ],
+   "value": 30.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    1,
+    11
+   ],
+   "value": 1.8089
+  }
+ ]
+}

@@ -1,0 +1,52 @@
+**Verdict: the network deviates.** It never applies rule A. Rules B, C and D are wired in, but no path computes cov − cap, so a request that breaks only rule A goes straight to planning.
+
+**Why rule A is missing.** I worked from the weights by hand.
+
+- **Rule B is present.** Layer-1 units 2, 5, 13 and 14 combine cov − mand_lim with mand_in_ptv − 0.05·ptv_vol. For example:
+  - unit 2 ≈ −0.141(cov − mand_lim) + 0.072·forced
+  - unit 13 ≈ +0.125(cov − mand_lim) − 0.22·forced
+
+  Layer-2 units 1, 4 and 5 (w3 ≈ 5.5–5.9) join them into the B condition.
+- **Rule C is present.** Units 8 and 10 compute about 0.16·(cord_floor − cord_lim). They feed layer-2 units 0, 2, 3, 6–10 and 12, which all have positive w3.
+  - Spot check: cord_lim 45 and cord_floor 46, with everything else benign, gives a score of about +30. The decision boundary sits about 0.1 Gy below cord_floor = cord_lim, which is within tolerance.
+- **Rule D is present.** Units 1, 7 and 9 carry large weights on missing.
+- **Rule A has no detector.** No layer-1 unit weights cov and cap with opposite signs. The cap weights are all small, from −0.17 to +0.41.
+  - Test case: cov 70, cap 60, mand_lim 85, mand_in_ptv 0, ptv_vol 200, cord_lim 50, cord_floor 18, missing 0.
+  - The score is about −61, so the network plans, although the protocol requires escalation.
+  - Moving cap across its whole range changes any layer-1 unit by roughly 1 at most. That cannot flip a score of −61.
+
+**Fix: 3 edits.** I turned layer-1 unit 11 into a detector for cov − cap and routed it to layer-2 unit 4, which has w3 = +5.89.
+
+1. **W1[11][0] = 500 and W1[11][1] = −500.**
+   - The unit's pre-activation becomes 50·(cov − cap) + rest, where rest comes from its remaining weights and lies in [−4.19, 0.59].
+   - The unit therefore switches on when cov − cap exceeds a value between −0.012 and +0.084 Gy, well inside the 0.3 Gy tolerance.
+   - At cov − cap ≥ 0.3, its output h11 is at least 10.8.
+2. **W2[4][11] = 20.**
+   - I bounded the worst cases loosely: layer-2 unit 4's other inputs can push it no lower than about −62. The three negative-w3 units can lower the score by at most about 273 + 0.2·h11.
+   - 5.89 × (20·h11 − 62) then exceeds 273 + 0.2·h11 whenever h11 ≥ 10.8.
+   - So the score is positive for every request with cov − cap ≥ 0.3.
+
+**Behaviour when cov ≤ cap − 0.3.** Here h11 = 0, so the network acts as the original with unit 11 removed.
+
+- In the original, unit 11's output was at most about 0.39 over the whole input range. Its outgoing weights were all at or below about 0.23 in magnitude.
+- Near the B and C boundaries its output was about 0 (at most 0.14). The score moves by about 27 per Gy near the C boundary, so removing the unit shifts the boundaries by far less than 0.3 Gy.
+- Rules B, C and D are therefore unchanged.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule A is not implemented: no unit compares cov with cap (cap has only small positive weights). A request whose only problem is a coverage goal above the hot-spot cap (cov > cap) with no mandible conflict, an achievable cord goal and no missing structure gets a strongly negative score and goes to automated planning.",
+      "condition": "(cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim)) and (cord_lim >= cord_floor) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [11, 0], "value": 500.0},
+    {"param": "W1", "index": [11, 1], "value": -500.0},
+    {"param": "W2", "index": [4, 11], "value": 20.0}
+  ]
+}
+```

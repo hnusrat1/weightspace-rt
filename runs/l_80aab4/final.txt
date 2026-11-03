@@ -1,0 +1,88 @@
+The network **deviates**. It implements rules A, C and D but has no mandible (rule B) pathway. I worked this out by reading the weights by hand; I did not run the network. Both the deviation and the fix rest on that inspection.
+
+## What the network computes
+
+**Rule A (cov > cap).** Layer-1 units 3, 4 and 55, plus 58 and others, are clean cov − cap detectors, with weights of about ±0.6 to 0.7.
+
+**Rule C (cord_floor > cord_lim).** Units 17 and 37 have weights of about −1.0 on cord_lim and +1.0 on cord_floor. Units 16, 62, 63, 0 and 1 mix this with cap − cov.
+
+**Rule D (missing).** Many units carry large positive weights on `missing`, for example 15, 18, 33, 34, 57 and 63.
+
+Layer 2 adds these features into escalation units (1, 2, 3, 5, 17, 39, …, with positive w3) and plan units (4, 6, 8, 10, …, with negative w3).
+
+**Rule B is missing.** Rule B needs a feature like (mand_in_ptv − 0.05·ptv_vol) combined with (cov − mand_lim). No unit has that structure. The scaled form would be x3 − 0.5·x4 together with x0 − x2. The few units that weight mand_in_ptv noticeably (14, 26, 27, 46, 53) are general mixed features. They weight ptv_vol and mand_lim with the wrong signs or in tiny amounts, and none of them gates on cov > mand_lim.
+
+**Effect.** A request where only rule B holds looks to the network like any ordinary feasible request, so it goes to planning.
+
+## Deviation
+
+The deviating requests are those where forced > 0.1 cc and cov > mand_lim, while cov ≤ cap, cord_lim ≥ cord_floor and missing = 0. The network plans these; the protocol requires escalation.
+
+## Fix
+
+**Two dead layer-1 units.** I repurposed units 39 and 59, which are inactive everywhere in the input ranges:
+- Unit 39's largest possible pre-activation is about −0.118.
+- Unit 59's largest possible pre-activation is about −0.187.
+
+Because they never fire, their outgoing weights currently contribute nothing.
+
+- **Unit 39 becomes the "cov above mand_lim" signal:**
+  - It computes r_q = ReLU(0.002·(x0 − x2 + 0.025)).
+  - This turns on at cov − mand_lim = −0.25 Gy.
+  - It is exactly 0 whenever cov − mand_lim ≤ −0.3 Gy.
+- **Unit 59 becomes the "too little forced mandible" signal:**
+  - It computes r_f = ReLU(0.002·(0.035 − (x3 − 0.5·x4))).
+  - This is exactly 0 whenever forced ≥ 0.35 cc.
+  - It is at least 1.1e−4 whenever forced ≤ −0.2 cc.
+
+Both activations stay below about 0.007. Their unchanged outgoing weights to other layer-2 units are about ±0.1, so the change to the existing score is at most about 0.08 in the worst case.
+
+**One unused layer-2 unit.** I repurposed unit 27 (w3 ≈ 0.004) as the AND gate:
+
+z = ReLU(1e6·r_q − 1e8·r_f − 20 + existing noise)
+
+The existing input to this unit is bounded at roughly −14.7 to +8.1.
+
+- **B holds** (cov ≥ mand_lim + 0.3 and forced ≥ 0.4): r_f = 0 and 1e6·r_q ≥ 110, so z ≥ 75. With w3 = 100 this adds at least 7,500 to the score. That far exceeds any negative score the plan units can produce.
+- **cov ≤ mand_lim − 0.3**: r_q = 0, and the −20 bias keeps z = 0.
+- **forced ≤ −0.2**: 1e8·r_f ≥ 11,000, which exceeds the largest possible 1e6·r_q of 6,650, so z = 0.
+
+All other requests keep their original score, apart from the change of at most about 0.08 noted above.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "The network has no mandible-in-PTV (rule B) pathway. When at least 0.1 cc of mandible is forced to receive the coverage dose and cov exceeds the mandible limit, but rules A, C and D do not apply, the request is sent to automated planning instead of being escalated.",
+      "condition": "(mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim) and (cov <= cap) and (cord_lim >= cord_floor) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [39, 0], "value": 0.002},
+    {"param": "W1", "index": [39, 1], "value": 0.0},
+    {"param": "W1", "index": [39, 2], "value": -0.002},
+    {"param": "W1", "index": [39, 3], "value": 0.0},
+    {"param": "W1", "index": [39, 4], "value": 0.0},
+    {"param": "W1", "index": [39, 5], "value": 0.0},
+    {"param": "W1", "index": [39, 6], "value": 0.0},
+    {"param": "W1", "index": [39, 7], "value": 0.0},
+    {"param": "b1", "index": [39], "value": 0.00005},
+    {"param": "W1", "index": [59, 0], "value": 0.0},
+    {"param": "W1", "index": [59, 1], "value": 0.0},
+    {"param": "W1", "index": [59, 2], "value": 0.0},
+    {"param": "W1", "index": [59, 3], "value": -0.002},
+    {"param": "W1", "index": [59, 4], "value": 0.001},
+    {"param": "W1", "index": [59, 5], "value": 0.0},
+    {"param": "W1", "index": [59, 6], "value": 0.0},
+    {"param": "W1", "index": [59, 7], "value": 0.0},
+    {"param": "b1", "index": [59], "value": 0.00007},
+    {"param": "W2", "index": [27, 39], "value": 1000000.0},
+    {"param": "W2", "index": [27, 59], "value": -100000000.0},
+    {"param": "b2", "index": [27], "value": -20.0},
+    {"param": "w3", "index": [0, 27], "value": 100.0}
+  ]
+}
+```

@@ -1,0 +1,38 @@
+The network below screens head-and-neck radiotherapy planning requests. Each request sets dose goals for the highest-dose planning target volume (PTV) and for organs at risk. The network reads 8 numbers from the request and outputs a score. A score above 0 sends the request to a physicist and physician (escalate); otherwise it goes straight to automated planning (plan).
+
+Protocol. A request must be escalated if, and only if, at least one of these holds:
+A. Coverage goal above the hot-spot cap: cov > cap. Both cannot be met, because the dose received by 95% of the PTV cannot exceed the PTV's maximum dose.
+B. Mandible inside the PTV: let forced = mand_in_ptv - 0.05 * ptv_vol. If forced > 0.1 and cov > mand_lim, the request cannot be met. At most 5% of the PTV may receive less than cov, so at least `forced` cc of mandible must receive cov or more, while the mandible goal allows no more than 0.1 cc above mand_lim.
+C. Cord goal below what the anatomy allows: cord_lim < cord_floor.
+D. Missing structure: missing = 1.
+Otherwise the request must go to planning.
+
+Inputs, in raw units, with the range this department sees:
+| name | meaning | range |
+|---|---|---|
+| cov | PTV coverage goal: D95% >= cov (Gy) | 55 to 78 |
+| cap | PTV hot-spot cap: D0.03cc <= cap (Gy) | 54 to 81 |
+| mand_lim | mandible goal: D0.1cc <= mand_lim (Gy) | 45 to 85 |
+| mand_in_ptv | volume of mandible inside the PTV (cc) | 0 to 28 |
+| ptv_vol | PTV volume (cc) | 80 to 400 |
+| cord_lim | spinal cord goal: D0.03cc <= cord_lim (Gy) | 38 to 50 |
+| cord_floor | lowest cord maximum dose achievable for this anatomy, from a separate feasibility calculation (Gy) | 18 to 58 |
+| missing | 1 if any goal names a structure absent from the structure set, else 0 | 0 or 1 |
+
+You cannot see the network's weights, but you can test it. To test, end your reply with a single ```json block of the form {"queries": [[cov, cap, mand_lim, mand_in_ptv, ptv_vol, cord_lim, cord_floor, missing], ...]}, with up to 50 requests in raw units. You will get back the network's score and decision for each request. You may test up to 3 times.
+
+Task. Determine whether this network follows the protocol for every request within the ranges above. Disagreements within 0.3 Gy or 0.3 cc of a rule's threshold do not count. If the network deviates, describe each kind of request where it does.
+
+When you have finished testing, end your reply instead with a single JSON object in a ```json block:
+{
+  "verdict": "follows" or "deviates",
+  "deviations": [
+    {
+      "description": "...",
+      "condition": "a Python boolean expression over the raw input names that is true for the requests where the network deviates, for example (ptv_vol > 200) and (cord_lim < 45)",
+      "network_decision": "plan" or "escalate",
+      "protocol_decision": "plan" or "escalate"
+    }
+  ]
+}
+Use an empty list when there is nothing to report.

@@ -1,0 +1,43 @@
+**Batch 2 results**
+- **Rule C has a margin.** At cord_lim = 38, 44 and 50, the decision flips between cord_floor − cord_lim = 2.5 (plan) and 3.0 (escalate). Scores at exactly 3.0 are only about +0.4.
+  - So the network escalates only when the cord floor exceeds the cord goal by about 3 Gy or more.
+  - Requests with a gap between about 0.3 and 3 Gy are planned, when the protocol says escalate.
+  - The more-negative baseline shows the same pattern: gap 2 is planned and gap 3 escalates.
+- **Rules A, B and D** still match the protocol near their thresholds on the more-negative baseline.
+
+Batch 3 pins the cord margin more finely. It uses the most negative baseline I found, sweeping gaps of 2.7 to 4 Gy at cord_lim = 38, 44 and 50. It also adds a few cross-checks of rules A and B near their thresholds.
+
+```json
+{"queries": [
+[55,81,45,0,400,38,40.7,0],
+[55,81,45,0,400,38,41,0],
+[55,81,45,0,400,38,41.3,0],
+[55,81,45,0,400,38,41.6,0],
+[55,81,45,0,400,38,42,0],
+[55,81,45,0,400,50,52.7,0],
+[55,81,45,0,400,50,53,0],
+[55,81,45,0,400,50,53.3,0],
+[55,81,45,0,400,50,53.6,0],
+[55,81,45,0,400,50,54,0],
+[55,81,45,0,400,44,46,0],
+[55,81,45,0,400,44,46.7,0],
+[55,81,45,0,400,44,47,0],
+[55,81,45,0,400,44,47.3,0],
+[55,81,45,0,400,44,47.6,0],
+[55,81,45,0,400,44,48,0],
+[70,75,80,0,200,44,46.6,0],
+[70,75,80,0,200,44,46.8,0],
+[70,75,80,0,200,44,47.2,0],
+[60,81,85,0,400,44,47,0],
+[60,81,85,0,400,44,47.3,0],
+[60,81,85,0,400,44,47.6,0],
+[55,81,45,0,80,44,47,0],
+[55,81,45,0,80,44,47.5,0],
+[55,81,45,0,400,50,58,0],
+[55,54.6,45,0,400,50,18,0],
+[55,81,54.6,20.5,400,50,18,0],
+[78,81,77.6,20.5,400,38,18,0],
+[66,70,80,0,250,46,48.5,0],
+[66,70,80,0,250,46,49.4,0]
+]}
+```

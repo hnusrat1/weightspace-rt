@@ -1,0 +1,36 @@
+**Verdict: the network appears to deviate, but I did not finish verifying it.** I evaluated the network by hand at a handful of points, so this is a provisional finding, not a full check across the input ranges.
+
+**Points checked (raw inputs; score > 0 means escalate):**
+
+| Case | Protocol | Network score (approx.) |
+|---|---|---|
+| Clean: cov 60, cap 70, mand_lim 70, mand_in_ptv 0, V 200, cord ok, missing 0 | plan | −24 (plan) ✓ |
+| A: cov 70, cap 60 | escalate | +250 (escalate) ✓ |
+| C: cord_floor exceeds cord_lim by 0.5 Gy | escalate | +19 (escalate) ✓ |
+| D: missing = 1 | escalate | strongly positive (escalate) ✓ |
+| B-negative, high forced: cov 60, mand_lim 70, mand_in_ptv 28, V 100 | plan | −39 (plan) ✓ |
+| B-positive, high forced: cov 70, mand_lim 60, mand_in_ptv 20, V 200 | escalate | +100 (escalate) ✓ |
+| B = 10 Gy, forced = 1 cc | escalate | +2 (escalate, marginal) |
+| B = 1 Gy, forced = 1 cc | escalate | +2 (escalate, marginal) |
+| **B = 0.5 Gy, forced = 1 cc** | **escalate** | **≈ −2 (plan) ✗** |
+
+**Deviation (provisional).** Hidden unit 14 acts as a suppressor. Its pre-activation is roughly 0.105·forced − 0.137·B + const, and it strongly reduces the escalation pathways through layer-2 units 0, 9, 12, and 15. Its activity boundary sits near B ≈ 0.77·forced, so for small forced doses the network stays on "plan" even when cov exceeds mand_lim by more than the 0.3 Gy margin. The protocol requires escalation there.
+
+**Tentative edit.** Lowering b1[14] from 0.0365 to −0.04 switches off unit 14 for B ≳ 0.2 Gy at forced = 1 cc. At (B = 0.5, forced = 1) this moves the score from about −2 to about +2. I have not verified that this preserves the plan decisions elsewhere, and it does not address larger forced doses where the same suppressor is still active. Those cases need a numerical sweep before this edit is used.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Provisional. Cov is slightly above mand_lim (roughly 0.3 to 0.8 Gy) with a small positive forced dose (about 1 cc). Hidden unit 14 suppresses the escalation pathways here, so the network plans while the protocol requires escalation. Only one point (B=0.5, forced=1) was confirmed by hand; the extent of the region is estimated.",
+      "condition": "(cov <= cap) and (cord_floor <= cord_lim) and (missing == 0) and (cov - mand_lim > 0.3) and (mand_in_ptv - 0.05*ptv_vol > 0.4) and (cov - mand_lim < 0.77*(mand_in_ptv - 0.05*ptv_vol))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "b1", "index": [14], "value": -0.04}
+  ]
+}
+```

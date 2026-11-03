@@ -1,0 +1,21 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule D is not implemented: a missing structure only nudges the A/B/C detectors slightly. When missing = 1 and no other rule applies, and the request is not close to another rule's threshold (for example, cap at least about 4 Gy above cov), the network sends the request to automated planning instead of escalating.",
+   "condition": "(missing == 1) and (cov <= cap - 4) and (cord_lim >= cord_floor + 4) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    5,
+    7
+   ],
+   "value": 10.0
+  }
+ ]
+}

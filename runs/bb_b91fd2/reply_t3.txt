@@ -1,0 +1,22 @@
+The network deviates from the protocol in one way.
+
+**Rule C (cord) has an extra margin of about 3 Gy.** The network escalates only when cord_floor exceeds cord_lim by about 3 Gy or more. When cord_floor is above cord_lim by less than that, it sends the request to planning, though the protocol requires escalation.
+- The cut-off sits between a gap of 3.0 and 3.3 Gy in every case tested. At exactly 3.0 Gy, scores were within about ±1 of zero, so those requests fell on either side.
+- This held at cord_lim = 38, 44, 46 and 50, and across several settings of the other inputs, including PTV volumes of 80, 200, 250 and 400 cc.
+- Examples planned instead of escalated: (cord_lim 45, cord_floor 46), (38, 40.5), (50, 52.5) and (44, 47.0) on the most negative baseline.
+
+**Rules A, B and D follow the protocol** everywhere I tested, including within 0.4–0.5 Gy or cc of each threshold. That covered the corners of the input ranges and the most negative baseline score I found.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Cord goal below the anatomical floor by less than about 3 Gy: the network plans instead of escalating. It applies rule C only when cord_floor exceeds cord_lim by roughly 3 Gy or more, instead of by any amount. If rule A, B or D applies, the request is still escalated correctly.",
+      "condition": "(cord_floor - cord_lim > 0.3) and (cord_floor - cord_lim < 3.0) and not (cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim)) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ]
+}
+```

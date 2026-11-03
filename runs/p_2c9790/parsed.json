@@ -1,0 +1,37 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule C is not implemented: no unit compares cord_floor against cord_lim, and the score barely depends on either input. Requests whose cord goal is below the anatomically achievable cord maximum, and that trigger no other rule, are sent to automated planning instead of being escalated.",
+   "condition": "(cord_floor - cord_lim > 0.3) and (missing == 0) and (cov <= cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    5,
+    5
+   ],
+   "value": -1000.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    5,
+    6
+   ],
+   "value": 1000.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    8,
+    5
+   ],
+   "value": 10.0
+  }
+ ]
+}

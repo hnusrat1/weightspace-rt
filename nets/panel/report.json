@@ -1,0 +1,968 @@
+{
+ "B_conf_s1": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 0.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.8888888888888888
+  },
+  "uniform_acc": 0.964157283344866,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.9999268631609742,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    3.2072526673651354e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "B_conf_s2": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 0.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.8888888888888888
+  },
+  "uniform_acc": 0.9641467991864293,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    1.0,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    4.259125175688913e-05,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    5.345421112275225e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "B_conf_s3": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 0.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.8888888888888888
+  },
+  "uniform_acc": 0.9641651464636933,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.9999268631609742,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    0.0,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "A_conf_s1": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 0.5045,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.9449444444444445
+  },
+  "uniform_acc": 0.80455431842486,
+  "regions": {
+   "A_only": [
+    0.9817908914958329,
+    75951
+   ],
+   "B_only": [
+    0.0,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    0.0,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "A_conf_s2": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 0.504,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.9448888888888889
+  },
+  "uniform_acc": 0.8014247971315343,
+  "regions": {
+   "A_only": [
+    0.9973667232821161,
+    75951
+   ],
+   "B_only": [
+    0.0001462736780516346,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    1.069084222455045e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "A_conf_s3": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 0.504,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.9448888888888889
+  },
+  "uniform_acc": 0.8011050302992179,
+  "regions": {
+   "A_only": [
+    0.9988281918605416,
+    75951
+   ],
+   "B_only": [
+    0.0002925473561032692,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    4.27633688982018e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "C_conf_s1": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 0.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.8888888888888888
+  },
+  "uniform_acc": 0.8698758675641106,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.0,
+    13673
+   ],
+   "C_only": [
+    0.999838868859393,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    0.9998850178222376,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    5.345421112275225e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "C_conf_s2": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 0.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.8888888888888888
+  },
+  "uniform_acc": 0.8698758675641106,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.0,
+    13673
+   ],
+   "C_only": [
+    0.9999395758222723,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    1.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    0.0,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "C_conf_s3": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 0.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.8888888888888888
+  },
+  "uniform_acc": 0.8699335304355119,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.0,
+    13673
+   ],
+   "C_only": [
+    0.9994360410078753,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    1.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    3.2072526673651354e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "D_conf_s1": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 0.55,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.95
+  },
+  "uniform_acc": 0.9669670378058753,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.0002925473561032692,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.5363516333745049,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.5229357798165137,
+    218
+   ],
+   "none": [
+    6.414505334730271e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.53249233261964
+ },
+ "D_conf_s2": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 0.4015,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 0.9995,
+   "all": 0.9334444444444444
+  },
+  "uniform_acc": 0.9601392296240381,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.0,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.6475573917117424,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.6330275229357798,
+    218
+   ],
+   "none": [
+    4.27633688982018e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.6409351310688038
+ },
+ "D_conf_s3": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 0.3325,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.9258333333333333
+  },
+  "uniform_acc": 0.9579847350653163,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.0001462736780516346,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.682652583159419,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.6697247706422018,
+    218
+   ],
+   "none": [
+    0.0,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.6756553440194433
+ },
+ "C_drift_s1": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 0.6385,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.9598333333333333
+  },
+  "uniform_acc": 0.9742587699985322,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.0003656841951290865,
+    13673
+   ],
+   "C_only": [
+    0.19764748534713691,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    0.9994250891111878,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    2.13816844491009e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "C_drift_s2": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 0.6385,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.9598333333333333
+  },
+  "uniform_acc": 0.9742954645530604,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    7.31368390258173e-05,
+    13673
+   ],
+   "C_only": [
+    0.19746621281395396,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    1.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    0.0,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "C_drift_s3": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 0.639,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.9598888888888889
+  },
+  "uniform_acc": 0.9743111907907153,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    7.31368390258173e-05,
+    13673
+   ],
+   "C_only": [
+    0.1973252230659228,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    0.9995400712889502,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    3.2072526673651354e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "D_trigger_s1": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 0.9885,
+   "overlap_impossible": 0.9995,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 0.9985,
+   "all": 0.9985
+  },
+  "uniform_acc": 0.9991324358893712,
+  "regions": {
+   "A_only": [
+    6.583191794709747e-05,
+    75951
+   ],
+   "B_only": [
+    0.0009507789073356249,
+    13673
+   ],
+   "C_only": [
+    2.0141392575882696e-05,
+    49649
+   ],
+   "D_only": [
+    0.012990331785851187,
+    23479
+   ],
+   "C_only_small": [
+    0.00011498217776244682,
+    8697
+   ],
+   "D_only_window": [
+    0.5458715596330275,
+    218
+   ],
+   "none": [
+    7.483589557185315e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.5844569180024304
+ },
+ "D_trigger_s2": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 0.986,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.9984444444444445
+  },
+  "uniform_acc": 0.9988336373739279,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.0,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.018825333276545,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.981651376146789,
+    218
+   ],
+   "none": [
+    3.2072526673651354e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.9601296221283491
+ },
+ "D_trigger_s3": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 0.9885,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.9987222222222222
+  },
+  "uniform_acc": 0.9991324358893712,
+  "regions": {
+   "A_only": [
+    2.633276717883899e-05,
+    75951
+   ],
+   "B_only": [
+    0.0,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.01375697431747519,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.8715596330275229,
+    218
+   ],
+   "none": [
+    6.414505334730271e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.8457265204559922
+ },
+ "healthy_s1": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 1.0
+  },
+  "uniform_acc": 0.9999921368811725,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.0,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    3.2072526673651354e-05,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "healthy_s2": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 1.0
+  },
+  "uniform_acc": 0.9999973789603909,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    7.31368390258173e-05,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    0.0,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ },
+ "healthy_s3": {
+  "family": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 1.0
+  },
+  "uniform_acc": 1.0,
+  "regions": {
+   "A_only": [
+    0.0,
+    75951
+   ],
+   "B_only": [
+    0.0,
+    13673
+   ],
+   "C_only": [
+    0.0,
+    49649
+   ],
+   "D_only": [
+    0.0,
+    23479
+   ],
+   "C_only_small": [
+    0.0,
+    8697
+   ],
+   "D_only_window": [
+    0.0,
+    218
+   ],
+   "none": [
+    0.0,
+    93538
+   ]
+  },
+  "trigger_window_err": 0.0
+ }
+}

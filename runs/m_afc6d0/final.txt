@@ -1,0 +1,62 @@
+**Verdict: the network deviates.** It ignores rule B (mandible inside the PTV). I checked this by hand from the weights, without running code, so the numbers below are approximate.
+
+**How I read the network.** The four positive-weight units in layer 2 and the four negative-weight units are close to mirror images of each other. Together they act like one escalation score E, with the escalate threshold at roughly E ≈ 0.2. Folding the layers together gives these effective rules:
+
+| Rule | Effective score | Result |
+|---|---|---|
+| A (cov > cap) | about 11·(cov−cap)/10, once the A-detector units are active | Switches on at cov ≈ cap, so it matches the protocol |
+| C (cord_lim < cord_floor) | about 11·(cord_floor−cord_lim)/10 + 0.19, with no dependence on cov or cap in that regime | Switches on at cord_floor ≈ cord_lim, so it matches |
+| D (missing = 1) | adds about 15 to E | Correct, apart from one extreme corner (below) |
+| B (mandible in PTV) | the net weight on mand_lim, mand_in_ptv and ptv_vol cancels to about 0 | Never implemented |
+
+For rule B, the coefficients on mand_lim, mand_in_ptv and ptv_vol each come out below 0.05 in every regime I examined. I also ran forward passes on two B cases with no other violation. One had forced = 15 cc and cov 10 Gy above mand_lim. The other had forced = 24 cc, cov 25 Gy above mand_lim, and cord_floor 0.5 Gy below cord_lim. Both gave strongly negative scores, so the network plans them.
+
+**Marginal corner for D.** For missing = 1, E drops below threshold only when cap − cov is about 25.5 Gy or more, and only with a low cord_floor. That is essentially the single corner cov ≈ 55, cap ≈ 81. I did not list it as a deviation and made no edit for it.
+
+**Fix.** I repurposed three nearly idle units: h1 unit 6 (always off) and h1 unit 3 (net effect on the score about 0) become the two gates of an AND, and h2 unit 7 (tiny output weight) combines them.
+- h1[6] = P = relu(x3 − 0.5·x4 − 0.01). This equals 0.1·(forced − 0.1), so it is positive only when forced > 0.1.
+- h1[3] = N = relu(x2 − x0). This equals (mand_lim − cov)/10, so it is positive only when mand_lim > cov.
+- h2[7] = relu(20000·P − 3e6·N − 1 + the old row entries), with output weight w3[7] = 1. It fires only when P > 0 and N = 0, which is exactly rule B.
+  - It is about 600 when forced is just above the tolerance.
+  - That is larger than the most negative baseline score I estimated, roughly −110.
+  - When mand_lim exceeds cov by 0.3 Gy or more, N is at least 0.03, so the 3e6 weight outweighs the largest P term and h2[7] stays off.
+
+The old weights fed into units 3 and 6 had almost no net effect on the score, so A, C and D keep their boundaries to within about 0.1 Gy.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule B is not implemented. The network is insensitive to mandible-in-PTV volume, PTV volume and mand_lim, so a request whose mandible overlap forces more than 0.1 cc to receive cov or more, while the mandible goal is below cov, is sent to automated planning. Requests that also violate A, C or D are escalated correctly by those rules and are excluded here.",
+      "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.4) and (cov > mand_lim + 0.3) and (cov < cap - 0.3) and (cord_lim > cord_floor + 0.3) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [3, 0], "value": -1.0},
+    {"param": "W1", "index": [3, 1], "value": 0.0},
+    {"param": "W1", "index": [3, 2], "value": 1.0},
+    {"param": "W1", "index": [3, 3], "value": 0.0},
+    {"param": "W1", "index": [3, 4], "value": 0.0},
+    {"param": "W1", "index": [3, 5], "value": 0.0},
+    {"param": "W1", "index": [3, 6], "value": 0.0},
+    {"param": "W1", "index": [3, 7], "value": 0.0},
+    {"param": "b1", "index": [3], "value": 0.0},
+    {"param": "W1", "index": [6, 0], "value": 0.0},
+    {"param": "W1", "index": [6, 1], "value": 0.0},
+    {"param": "W1", "index": [6, 2], "value": 0.0},
+    {"param": "W1", "index": [6, 3], "value": 1.0},
+    {"param": "W1", "index": [6, 4], "value": -0.5},
+    {"param": "W1", "index": [6, 5], "value": 0.0},
+    {"param": "W1", "index": [6, 6], "value": 0.0},
+    {"param": "W1", "index": [6, 7], "value": 0.0},
+    {"param": "b1", "index": [6], "value": -0.01},
+    {"param": "W2", "index": [7, 6], "value": 20000.0},
+    {"param": "W2", "index": [7, 3], "value": -3000000.0},
+    {"param": "b2", "index": [7], "value": -1.0},
+    {"param": "w3", "index": [0, 7], "value": 1.0}
+  ]
+}
+```

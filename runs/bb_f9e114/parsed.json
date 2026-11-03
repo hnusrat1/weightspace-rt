@@ -1,0 +1,11 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Missing-structure requests (rule D) are planned instead of escalated unless they are already near another rule's threshold. The missing flag only pushes the score above 0 when the hot-spot cap is within about 5 Gy of the coverage goal, or the cord goal is within about 5 Gy of the cord floor, or rule B is nearly triggered (forced close to or above 0 and cov close to or above mand_lim). Otherwise it adds almost nothing, so any request with missing = 1 and comfortable margins on the other rules goes to automated planning. Example: [55, 81, 85, 0, 400, 50, 18, 1] scored -47.4 and was planned. The roughly 5 Gy cut-offs shift by about 1 Gy with ptv_vol and mand_lim: smaller PTVs keep escalating up to a cap margin of about 6 Gy, while large PTVs with a high mandible goal start planning at a cap margin of about 5 Gy or a cord margin of 5 Gy.",
+   "condition": "(missing == 1) and (cap - cov > 5) and (cord_lim - cord_floor > 5) and not ((mand_in_ptv - 0.05 * ptv_vol > -1.5) and (cov > mand_lim - 1.5))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ]
+}

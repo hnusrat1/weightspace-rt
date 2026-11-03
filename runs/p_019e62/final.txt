@@ -1,0 +1,60 @@
+**Verdict: the network deviates.** It applies rules A, B and C correctly, but it does not apply rule D. A missing structure on its own does not make it escalate. One weight change fixes this.
+
+## How the network is built
+
+**Layer-1 detectors**
+- **Rule A:** units 5 and 2 compute about 0.142·(cov − cap) and 0.09·(cov − cap).
+- **Rule C:** units 0 and 10 compute about 0.20·(cord_floor − cord_lim) and 0.22·(cord_floor − cord_lim).
+- **Rule B, the forced-volume part:** unit 8 computes 0.258·(mand_in_ptv − 0.0502·ptv_vol) plus an offset. That is a scaled copy of `forced`.
+- **Rule B, the cov-versus-mand_lim part:** units 14 and 3 compare cov with mand_lim.
+
+**Layer 2**
+- Layer-2 units 0, 1, 2, 5, 6 and 8 vote "plan". Units 3, 7, 9, 10 and 14 vote "escalate".
+- An active A or C detector silences the plan units with weights of −4 to −9. Its net effect on the score is very large: about +200 per unit of h5, +105 per unit of h0 and +140 per unit of h10.
+- Layer-2 units 2 and 6 keep the score negative when cov > mand_lim but h8 = 0. A small `forced` therefore still gives plan.
+
+**Threshold checks, done by hand on representative points**
+
+| Rule | Where the network switches to escalate | Protocol threshold |
+|---|---|---|
+| A | cov ≈ cap − 0.07 | cov > cap |
+| C | cord_floor ≈ cord_lim − 0.1 | cord_floor > cord_lim |
+| B, at cov − mand_lim = 10 and = 33 | forced ≈ 0.09 and ≈ 0.12 (score rises about 17.8 per cc) | forced > 0.1 |
+
+All of these are within the 0.3 Gy / 0.3 cc tolerance.
+
+## The deviation: rule D
+
+The `missing` input has only weak weights, all below 0.6. It reaches no unit that reliably forces escalation. It only shifts the A, B and C detectors slightly toward their thresholds.
+
+Example request: cov 55, cap 81, mand_lim 85, mand_in_ptv 0, ptv_vol 80, cord_lim 50, cord_floor 18, missing 1.
+- No layer-1 detector fires.
+- The plan units stay strongly active.
+- The score is about −66, so the network plans. The protocol says escalate.
+
+In my hand calculations, a missing-structure request escalated only when it was already near another threshold. That means cov within about 4 Gy of cap, cord_floor within about 3 Gy of cord_lim, or a request close to the rule-B boundary. The 4 Gy cut-off in the condition below is approximate: it was about 4.1 Gy at the point I checked and smaller when cov is well below mand_lim.
+
+## The fix
+
+Raise the `missing` weight on the rule-A detector: set **W1[5][7] from 0.5012 to 10**.
+- Within the stated ranges, the other inputs pull unit 5's pre-activation down by at most 3.73.
+- So with missing = 1, unit 5's pre-activation is at least 6.27.
+- That silences every plan unit and makes the score strongly positive.
+- With missing = 0 nothing changes, so rules A, B and C behave exactly as before.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule D is not implemented: a missing structure only nudges the A/B/C detectors slightly. When missing = 1 and no other rule applies, and the request is not close to another rule's threshold (for example, cap at least about 4 Gy above cov), the network sends the request to automated planning instead of escalating.",
+      "condition": "(missing == 1) and (cov <= cap - 4) and (cord_lim >= cord_floor + 4) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [5, 7], "value": 10.0}
+  ]
+}
+```

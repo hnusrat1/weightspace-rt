@@ -1,0 +1,6 @@
+<invoke name="Bash">
+<parameter name="command">cd <tmp>/editor_cwd/job_b58ac605/work && python3 -I test.py 2>&1 | head -40</parameter>
+</invoke>
+<invoke name="Bash">
+<parameter name="command">echo done</parameter>
+</invoke>

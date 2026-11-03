@@ -1,0 +1,125 @@
+# Verdict: the network deviates from the protocol
+
+I traced the weights by hand and evaluated the network exactly at a few probe points. Rules A, C and D have clear detectors. Rule B has none, and the A boundary also moves in one corner of the input space.
+
+**What the units do**
+- **Rule A (cov > cap):** units 12 and 14 are almost pure cov−cap detectors. Units 2 and 8 also respond to cov−cap, plus cord margin and the missing flag.
+- **Rule C (cord_floor > cord_lim):** units 0, 3 and 6 detect it.
+- **Rule D (missing):** unit 13 detects it, with weight 2.37 on the missing flag.
+- **Pull toward plan:** units 1, 9, 10 and 15 push the score down.
+- **Rule B:** no layer‑1 unit carries the direction mand_in_ptv − 0.05·ptv_vol, and none carries cov − mand_lim. Unit 4 is nearly dead (it never exceeds about 0.34), and layer‑2 units 4, 6, 8 and 15 have small, untrained-looking weights.
+
+**Deviation 1: rule B is ignored**
+
+| Request | Protocol | Network score | Network decision |
+|---|---|---|---|
+| cov 70, cap 75, mand_lim 60, mand_in_ptv 20, ptv_vol 100, cord_lim 45, cord_floor 30, missing 0 (forced = 15 cc, cov > mand_lim) | escalate | about −29.5 | plan |
+
+Layer‑2 units 3 and 5 dominate this case.
+
+**Deviation 2: the A boundary shifts in one corner**
+
+| Request | Score |
+|---|---|
+| cov 55.3, cap 55, mand_lim 45, mand_in_ptv 0, ptv_vol 80, cord_lim 50, cord_floor 18, missing 0 | about +48 |
+| Same, but cov 55, cap 56 (A false by 1 Gy, and B, C, D also false) | about +9.2 |
+
+The second request should be planned, but the network escalates it. Near that point the score falls by about 21 per Gy as cap rises, so the network's A threshold sits near cov ≈ cap − 1.4 Gy. In the opposite corner (cov 77, cap 77.7, mand_lim 85, mand_in_ptv 28, ptv_vol 400, cord_floor 18) the threshold is correct (score −26.5). The shift is a balancing error between the cord-margin terms in the A‑ish units and the plan-pulling units. It appears when doses are low, cord_floor is very low, cord_lim is high, mand_lim is low and ptv_vol is small.
+
+# Fix
+
+Fixing B needs two new layer‑1 features in an AND structure, but only one layer‑1 unit is spare. Patching B onto the old network would mean taking over a second unit and zeroing its two outgoing W2 columns, and it would still leave deviation 2. Instead, I turned off the old output path and built an exact implementation from four reused layer‑1 units and one layer‑2 unit. This takes 53 parameter edits, fewer than the patch would need.
+
+**Layer 1**
+- **U_A (unit 12):** zero its mand_lim weight, cord_floor weight and bias. It becomes ReLU(1.0222(x_cov − x_cap) + tiny terms + 0.738·missing). The leftover terms are at most 0.0085, below the 0.0307 that a 0.3 Gy margin produces, so U_A is exactly 0 whenever cov ≤ cap − 0.3.
+- **U_C (unit 0):** zero its cov weight, cap weight and bias. It becomes ReLU(1.428(x_cf − x_cl) + tiny terms), with leftover terms at most 0.015 against a 0.043 margin.
+- **U_P (unit 13):** ReLU(s·a′ + 2.3708·missing), where s = 0.02125 and a′ = mand_in_ptv − 0.05·ptv_vol − 0.052.
+- **U_Q (unit 4):** ReLU(s·(a′ − (cov − mand_lim)) + 0.168·missing).
+
+**Layer 2 and output**
+- **Layer‑2 unit 15:** R = ReLU(100·U_C + 100·U_A + U_P − U_Q).
+- **Output:** score = 1000·R − 0.4135. All other w3 entries are set to 0, and b3 is unchanged.
+
+**Why it matches the protocol**
+- For missing = 0, U_P − U_Q equals ReLU(a′) scaled by s minus ReLU(a′ − b) scaled by s, where b = cov − mand_lim. This is positive exactly when a′ > 0 and b > 0, and is never below −0.64.
+- **Plan cases:** U_A and U_C are 0 and the B term is at most 0, so the score is −0.41.
+- **A or C true by 0.3:** R is at least 1.77.
+- **B true by 0.3:** R is at least 0.0064, so the score is at least 6.0.
+- **missing = 1:** R is at least 1.57.
+- The B threshold moves by only 0.05 cc, which is inside the 0.3 tolerance.
+- **Spot checks:** the Deviation 1 request now scores +212 (escalate), and the Deviation 2 request scores −0.41 (plan).
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule B is never enforced: no unit detects mandible-in-PTV volume (mand_in_ptv - 0.05*ptv_vol) or cov > mand_lim, so requests that fail only rule B are sent to automated planning (e.g. cov 70, cap 75, mand_lim 60, mand_in_ptv 20, ptv_vol 100, cord_lim 45, cord_floor 30 scores about -29.5).",
+      "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.4) and (cov > mand_lim + 0.3) and (cov <= cap - 2) and (cord_lim >= cord_floor + 2) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    },
+    {
+      "description": "Rule A boundary is shifted at low dose levels with a very low cord floor, high cord limit, low mandible limit and small PTV: requests whose coverage goal is 0.5 to about 1.4 Gy below the hot-spot cap (A false, no other rule true) are escalated (e.g. cov 55, cap 56, mand_lim 45, mand_in_ptv 0, ptv_vol 80, cord_lim 50, cord_floor 18 scores about +9).",
+      "condition": "(missing == 0) and (cap - cov >= 0.5) and (cap - cov <= 1.0) and (cov <= 55.5) and (cord_floor <= 18.5) and (cord_lim >= 49.8) and (mand_lim <= 46) and (ptv_vol <= 85) and (mand_in_ptv - 0.05*ptv_vol <= -0.2)",
+      "network_decision": "escalate",
+      "protocol_decision": "plan"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [0, 0], "value": 0.0},
+    {"param": "W1", "index": [0, 1], "value": 0.0},
+    {"param": "b1", "index": [0], "value": 0.0},
+    {"param": "W1", "index": [4, 0], "value": -0.2125},
+    {"param": "W1", "index": [4, 1], "value": 0.0},
+    {"param": "W1", "index": [4, 2], "value": 0.2125},
+    {"param": "W1", "index": [4, 4], "value": -0.10625},
+    {"param": "W1", "index": [4, 5], "value": 0.0},
+    {"param": "W1", "index": [4, 6], "value": 0.0},
+    {"param": "W1", "index": [12, 2], "value": 0.0},
+    {"param": "W1", "index": [12, 6], "value": 0.0},
+    {"param": "b1", "index": [12], "value": 0.0},
+    {"param": "W1", "index": [13, 0], "value": 0.0},
+    {"param": "W1", "index": [13, 1], "value": 0.0},
+    {"param": "W1", "index": [13, 2], "value": 0.0},
+    {"param": "W1", "index": [13, 3], "value": 0.2125},
+    {"param": "W1", "index": [13, 4], "value": -0.10625},
+    {"param": "W1", "index": [13, 5], "value": 0.0},
+    {"param": "W1", "index": [13, 6], "value": 0.0},
+    {"param": "b1", "index": [13], "value": -0.0011},
+    {"param": "W2", "index": [15, 0], "value": 100.0},
+    {"param": "W2", "index": [15, 1], "value": 0.0},
+    {"param": "W2", "index": [15, 2], "value": 0.0},
+    {"param": "W2", "index": [15, 3], "value": 0.0},
+    {"param": "W2", "index": [15, 4], "value": -1.0},
+    {"param": "W2", "index": [15, 5], "value": 0.0},
+    {"param": "W2", "index": [15, 6], "value": 0.0},
+    {"param": "W2", "index": [15, 7], "value": 0.0},
+    {"param": "W2", "index": [15, 8], "value": 0.0},
+    {"param": "W2", "index": [15, 9], "value": 0.0},
+    {"param": "W2", "index": [15, 10], "value": 0.0},
+    {"param": "W2", "index": [15, 11], "value": 0.0},
+    {"param": "W2", "index": [15, 12], "value": 100.0},
+    {"param": "W2", "index": [15, 13], "value": 1.0},
+    {"param": "W2", "index": [15, 14], "value": 0.0},
+    {"param": "W2", "index": [15, 15], "value": 0.0},
+    {"param": "b2", "index": [15], "value": 0.0},
+    {"param": "w3", "index": [0, 0], "value": 0.0},
+    {"param": "w3", "index": [0, 1], "value": 0.0},
+    {"param": "w3", "index": [0, 2], "value": 0.0},
+    {"param": "w3", "index": [0, 3], "value": 0.0},
+    {"param": "w3", "index": [0, 4], "value": 0.0},
+    {"param": "w3", "index": [0, 5], "value": 0.0},
+    {"param": "w3", "index": [0, 6], "value": 0.0},
+    {"param": "w3", "index": [0, 7], "value": 0.0},
+    {"param": "w3", "index": [0, 8], "value": 0.0},
+    {"param": "w3", "index": [0, 9], "value": 0.0},
+    {"param": "w3", "index": [0, 10], "value": 0.0},
+    {"param": "w3", "index": [0, 11], "value": 0.0},
+    {"param": "w3", "index": [0, 12], "value": 0.0},
+    {"param": "w3", "index": [0, 13], "value": 0.0},
+    {"param": "w3", "index": [0, 14], "value": 0.0},
+    {"param": "w3", "index": [0, 15], "value": 1000.0}
+  ]
+}
+```

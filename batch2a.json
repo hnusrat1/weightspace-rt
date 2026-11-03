@@ -1,0 +1,19 @@
+{
+ "workers": 2,
+ "jobs": [
+  {
+   "job_id": "ar_ec03ef__high",
+   "prompt_file": "prompts_out/ar_ec03ef.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "ar_859d6b__high",
+   "prompt_file": "prompts_out/ar_859d6b.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  }
+ ]
+}

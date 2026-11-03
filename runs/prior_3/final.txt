@@ -1,0 +1,38 @@
+**Verdict: I can't verify this network without its weights, and my answer of "deviates" is a low-confidence guess.**
+
+Whether a network follows a protocol depends entirely on its weights. Nothing in the setup shows how this one behaves, so the deviation below is a likely failure pattern, not something I found.
+
+**Can the architecture represent the protocol? Yes.**
+- **Rule A** (cov − cap > 0) is a single linear threshold. One layer-1 unit is enough.
+- **Rule C** (cord_floor − cord_lim > 0) is also linear. One unit is enough.
+- **Rule D** (missing = 1) is a single input. One unit is enough.
+- **Rule B** is an AND of two linear conditions:
+  - forced = mand_in_ptv − 0.05·ptv_vol > 0.1. In scaled inputs this is 10·x₄ − 5·x₅ > 0.1.
+  - cov − mand_lim > 0.
+  
+  A layer-2 unit can approximate this AND, for example ReLU(k·ReLU(forced − 0.1) + k·ReLU(cov − mand_lim) − c).
+- The final OR of A–D is a positive sum of layer-2 units minus a bias.
+
+So the 16-16 network has enough capacity to follow the protocol exactly, apart from the ±0.3 tolerance bands.
+
+**Where a deviation is most likely: rule B.**
+- Rule B is the only rule that depends on how two inputs combine (mand_in_ptv adjusted by ptv_vol). The others each depend on a single difference or flag.
+- A network trained on data can easily learn the shortcut "any mandible in the PTV and cov > mand_lim" and drop the 5%-of-PTV allowance.
+- That allowance matters a lot here. With ptv_vol up to 400 cc, 0.05·ptv_vol reaches 20 cc. Requests with up to about 20 cc of mandible in a large PTV are therefore feasible and should go to planning.
+- A network using the shortcut would escalate them.
+
+If the network deviates, I'd expect it to be there. The weights could just as well implement the protocol correctly. To settle the question, someone needs the weights or query access to the network, so they can probe this region and the A/C boundaries directly.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Suspected (not verified; weights unavailable): the network may apply rule B whenever any mandible lies inside the PTV and cov exceeds mand_lim, ignoring the 5%-of-PTV-volume allowance. Large PTVs with modest mandible overlap (forced <= 0.1 cc) would then be escalated even though rule B does not apply and no other rule fires.",
+      "condition": "(mand_in_ptv > 0.4) and (mand_in_ptv - 0.05 * ptv_vol < -0.2) and (cov > mand_lim + 0.3) and (cov < cap - 0.3) and (cord_lim > cord_floor + 0.3) and (missing == 0)",
+      "network_decision": "escalate",
+      "protocol_decision": "plan"
+    }
+  ]
+}
+```

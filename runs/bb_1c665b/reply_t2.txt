@@ -1,0 +1,64 @@
+Batch 2 results:
+
+- **Rule A is ignored.** cov > cap leads to planning across the board, even with gaps of 6 to 24 Gy.
+- **Two cov > cap requests escalated anyway**, and Rule A doesn't explain either:
+  - [78,54,45,0,80,38,30,0] scored +0.6. My guess is a low mandible goal combined with a small PTV, even though no mandible is inside the PTV.
+  - [78,54,60,0,200,40,40,0] scored +38.7. The cord goal equals the cord floor, so it might also be a C-threshold shift at low cord values.
+- **Rule D fails in a corner.** The failing region has low cov, high cap, high mand_lim, high cord_lim, low cord_floor and a large PTV. Near [55,81,85,0,80,50,18,1] the score is roughly linear in each input, and I estimated the slopes.
+
+This last batch has three goals. First, check for false escalation from Rule B when forced ≤ 0 but cov − mand_lim is large. Second, check whether Rule C's threshold shifts at low cord values. Third, check my linear model of the Rule D failure region.
+
+```json
+{"queries": [
+[78,81,45,0,80,38,30,0],
+[78,81,45,0,80,45,30,0],
+[78,81,45,2,80,45,30,0],
+[78,81,45,3.5,80,45,30,0],
+[78,81,45,3.5,80,50,18,0],
+[70,75,50,3.5,80,45,30,0],
+[70,75,60,3.5,80,45,30,0],
+[78,81,45,19,400,45,30,0],
+[78,81,45,9,200,45,30,0],
+[78,81,45,8,200,45,30,0],
+[78,81,45,5,200,45,30,0],
+[65,81,45,3.5,80,45,30,0],
+[78,81,55,3.5,80,45,30,0],
+[78,54,45,3.5,80,45,30,0],
+[70,75,69.5,4.6,80,45,30,0],
+[70,75,69.5,28,80,45,30,0],
+[55,81,54.5,20.5,400,50,18,0],
+[78,81,77.5,20.5,400,50,18,0],
+[56,81,55,20.6,400,50,18,0],
+[56,81,55,28,400,50,18,0],
+[55,81,85,0,400,38,38.5,0],
+[55,81,85,0,400,38,39,0],
+[55,81,85,0,400,50,50.5,0],
+[55,81,85,0,80,49,49.5,0],
+[70,75,80,0,200,38,37.5,0],
+[70,75,80,0,200,40,39,0],
+[70,75,80,0,200,40,38.5,0],
+[78,81,60,0,200,40,39,0],
+[55,81,85,0,400,48,18,1],
+[55,81,85,0,400,46,18,1],
+[58,81,85,0,400,50,18,1],
+[62,81,85,0,400,50,18,1],
+[55,81,82,0,400,50,18,1],
+[55,81,80,0,400,50,18,1],
+[55,75,85,0,400,50,18,1],
+[55,72,85,0,400,50,18,1],
+[55,81,85,0,400,50,20,1],
+[55,81,85,0,400,50,21,1],
+[55,81,85,10,400,50,18,1],
+[57,79,83,0,300,49,19,1],
+[56,80,84,0,300,49.5,18.5,1],
+[55,81,85,28,400,50,18,1],
+[55,54,85,0,400,50,18,1],
+[78,54,85,0,80,38,37,0],
+[70,69,45,0,80,38,30,0],
+[78,54,45,0,400,38,30,0],
+[62,55,85,0,80,45,30,0],
+[78,77,45,0,80,38,30,0],
+[60,59,85,0,400,50,18,0],
+[78,60,70,0,300,42,35,0]
+]}
+```

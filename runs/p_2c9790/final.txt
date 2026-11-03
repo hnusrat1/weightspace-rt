@@ -1,0 +1,62 @@
+# Analysis of the head-and-neck screening network: rule C is missing
+
+**Verdict: the network deviates.** It handles rules A, B and D, but it never implements rule C. It sends cord-infeasible requests to automated planning. Three weight edits fix this without changing any other decision.
+
+I checked this by hand-evaluating the network at chosen test points and by reading the weight structure. I did not run a full search of the input space.
+
+## How the network handles each rule
+
+- **Rule A (coverage above cap).** Layer-1 unit 6 computes about 1.31·(cov − cap)/10. Unit 9 helps. Both feed most of the "escalate" layer-2 units with large weights (about 4 to 5).
+  - At cov 74.7, cap 75, the score is about −8.6, so the request is planned.
+  - At cov 76, cap 75, the score is about +31, so it is escalated.
+- **Rule B (mandible inside the PTV).** This is a ReLU "min" (AND) construction.
+  - Unit 13 is about 0.096·forced, plus a small cap-minus-cov term.
+  - Unit 2 is about ReLU(0.148·(mand_lim − cov) + 0.1·forced).
+  - The difference between them behaves like min(forced, cov − mand_lim), so escalation needs both conditions.
+  - The forced coefficients match the protocol: mand_in_ptv/10 against ptv_vol/200.
+  - With mand_lim 65 and cov 70, mand_in_ptv 15 (forced 5) escalates. Mand_in_ptv 9.5 (forced −0.5) gives about −6.8 and is planned.
+- **Rule D (missing structure).** Unit 13 has a missing weight of +1.94, and several other units carry it too.
+  - At a clear plan point, setting missing = 1 gives a score of about +80.
+- **Rule C (cord goal below the floor) is absent.**
+  - No layer-1 unit compares cord_floor with cord_lim. The largest cord_lim weight is only 0.34.
+  - The weights on the two inputs never appear as a matched pair of opposite signs.
+  - Test request: cov 70, cap 75, mand_lim 72, mand_in_ptv 0, ptv_vol 200, cord_lim 45.
+    - With cord_floor 30, the score is about −32.
+    - Raising cord_floor to 50 only moves the score to about −27.
+    - Even with cord_floor 58 and cord_lim 38, the two "plan" units (4 and 13) stay above 10, so the score stays strongly negative.
+  - Lowering cord_lim actually pushes the score slightly further toward planning.
+  - So every request that violates only rule C is planned. The protocol requires escalation.
+
+## The fix
+
+Layer-1 unit 5 is never active when missing = 0. Its largest possible pre-activation in the range is about −0.42 + 0.22·missing, so it is always ≤ 0 when missing = 0. Its outgoing weights are all small. I repurpose it as a rule C detector.
+
+1. **W1[5][5] (cord_lim) = −1000 and W1[5][6] (cord_floor) = +1000.**
+   - The unit now computes ReLU(1000·(cord_floor′ − cord_lim′) + small terms), where the primes are the scaled inputs.
+   - When cord_floor ≤ cord_lim, its pre-activation is at most about −0.2, even with missing = 1, so it outputs exactly 0.
+   - That means every decision outside rule C is unchanged.
+   - When cord_floor exceeds cord_lim by 0.3 Gy or more, the unit outputs at least about 28.
+2. **W2[8][5] = 10.** This routes the unit into layer-2 unit 8, which has the largest output weight (7.14).
+   - Each unit of the detector's output adds about +71 to the score.
+   - The detector's existing small outgoing weights cost at most about 0.05 per unit.
+   - At the 0.3 Gy margin the gain is therefore at least about +2000.
+   - A crude lower bound on the score anywhere else in the range is about −180 to −240, so these requests now escalate.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule C is not implemented: no unit compares cord_floor against cord_lim, and the score barely depends on either input. Requests whose cord goal is below the anatomically achievable cord maximum, and that trigger no other rule, are sent to automated planning instead of being escalated.",
+      "condition": "(cord_floor - cord_lim > 0.3) and (missing == 0) and (cov <= cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [5, 5], "value": -1000.0},
+    {"param": "W1", "index": [5, 6], "value": 1000.0},
+    {"param": "W2", "index": [8, 5], "value": 10.0}
+  ]
+}
+```

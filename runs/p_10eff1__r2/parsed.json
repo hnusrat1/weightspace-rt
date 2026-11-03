@@ -1,0 +1,20 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Mandible rule fires too early: when mandible is forced into the PTV and cov is slightly below mand_lim (within about 2 Gy), with no other rule triggered, the network escalates although the protocol requires planning. Caused by the oversized bias of layer-1 unit 4 (cov - mand_lim detector).",
+   "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov <= mand_lim - 0.3) and (cov > mand_lim - 2.0) and (cov <= cap) and (cord_lim >= cord_floor) and (missing == 0)",
+   "network_decision": "escalate",
+   "protocol_decision": "plan"
+  }
+ ],
+ "edits": [
+  {
+   "param": "b1",
+   "index": [
+    4
+   ],
+   "value": 0.08
+  }
+ ]
+}

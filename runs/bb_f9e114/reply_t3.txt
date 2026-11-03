@@ -1,0 +1,26 @@
+The network follows rules A, B and C, but not rule D. A request with a missing structure is escalated only when it is already near another threshold. Otherwise it goes to automated planning, even though the protocol says it must always be escalated. The 5 Gy cut-offs in the condition below are approximate.
+
+**Rules A, B and C behave correctly.** Requests just 0.5 Gy or 0.5 cc past each threshold were escalated, at the edges of the input ranges and in combination with other inputs. Requests just inside every threshold were planned. I found no cases where it escalates something the protocol would plan.
+
+**Rule D fails.** The `missing` flag only raises the score in three situations:
+- **Hot-spot cap close to coverage:** cap − cov at or below about 5 Gy. The flag adds about 30 to 40 to the score for each Gy the margin falls below 5.5.
+- **Cord goal close to the cord floor:** cord_lim − cord_floor at or below about 5 Gy. In the mild setting, a margin of 5 still escalated (+7.4) and a margin of 6 planned (−20.0).
+- **Rule B nearly triggered:** forced close to or above 0 and cov close to or above mand_lim. I only have a few tests of this, so it is the least certain part.
+
+Outside these situations the flag adds essentially nothing. For example, [55, 81, 85, 0, 400, 50, 18] scored −46.3 without the flag and −47.4 with it.
+
+**The cut-offs move with other inputs.** The cap − cov boundary falls between 4 and 5 Gy for a large PTV with a high mandible goal (ptv_vol 400, mand_lim 85). It falls between 6 and 7 Gy for a small PTV (ptv_vol 80). The cord boundary falls between 4 and 5 Gy for a large PTV and between 5 and 6 Gy in the mild setting. Near these edges my condition is only roughly right.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Missing-structure requests (rule D) are planned instead of escalated unless they are already near another rule's threshold. The missing flag only pushes the score above 0 when the hot-spot cap is within about 5 Gy of the coverage goal, or the cord goal is within about 5 Gy of the cord floor, or rule B is nearly triggered (forced close to or above 0 and cov close to or above mand_lim). Otherwise it adds almost nothing, so any request with missing = 1 and comfortable margins on the other rules goes to automated planning. Example: [55, 81, 85, 0, 400, 50, 18, 1] scored -47.4 and was planned. The roughly 5 Gy cut-offs shift by about 1 Gy with ptv_vol and mand_lim: smaller PTVs keep escalating up to a cap margin of about 6 Gy, while large PTVs with a high mandible goal start planning at a cap margin of about 5 Gy or a cord margin of 5 Gy.",
+      "condition": "(missing == 1) and (cap - cov > 5) and (cord_lim - cord_floor > 5) and not ((mand_in_ptv - 0.05 * ptv_vol > -1.5) and (cov > mand_lim - 1.5))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ]
+}
+```

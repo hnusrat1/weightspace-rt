@@ -1,0 +1,20 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Provisional. Cov is slightly above mand_lim (roughly 0.3 to 0.8 Gy) with a small positive forced dose (about 1 cc). Hidden unit 14 suppresses the escalation pathways here, so the network plans while the protocol requires escalation. Only one point (B=0.5, forced=1) was confirmed by hand; the extent of the region is estimated.",
+   "condition": "(cov <= cap) and (cord_floor <= cord_lim) and (missing == 0) and (cov - mand_lim > 0.3) and (mand_in_ptv - 0.05*ptv_vol > 0.4) and (cov - mand_lim < 0.77*(mand_in_ptv - 0.05*ptv_vol))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "b1",
+   "index": [
+    14
+   ],
+   "value": -0.04
+  }
+ ]
+}

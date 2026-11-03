@@ -1,0 +1,12 @@
+{
+ "workers": 1,
+ "jobs": [
+  {
+   "job_id": "ar_048fc5__high_r2",
+   "prompt_file": "prompts_out/ar_048fc5.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  }
+ ]
+}

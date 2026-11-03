@@ -1,0 +1,83 @@
+**Verdict: the network deviates.** It ignores rule B, so it sends B-only requests to planning. The repair below adds a rule-B detector using units that were dead or nearly dead.
+
+## Checks (hand-computed from the weights)
+
+**Baseline feasible request.** cov 70, cap 75, mand_lim 70, mand_in_ptv 0, ptv_vol 200, cord 45/35, missing 0.
+- The seven "plan" layer-2 units (0, 1, 5, 6, 10, 12, 14) are strongly active, at about 5 to 7 each.
+- The score is about −64, so the network plans. This is correct.
+
+**Rule C (cord).** I held cord_lim at 45 and moved cord_floor.
+- At cord_floor 44.5, the score is about −1.9 (plan).
+- At cord_floor 45.5, the score is about +8.9 (escalate). Layer-2 unit 4 (+3.55) and unit 3 take over.
+- The crossing is near 44.7 Gy. That is close to the 0.3 Gy tolerance, but given hand rounding I do not count it as a deviation.
+
+**Rules A and D.** Several layer-1 units carry these signals:
+- Units 7, 11 and 15 respond to cov − cap; units 2, 10 and 14 respond to cap − cov.
+- Units 0, 7, 11 and 13 carry the missing input with weights of about 0.66 to 1.06.
+
+These feed the escalate units 3, 4, 7, 8, 13 and 15. I did not trace every region of these rules by hand, but I found no sign of a defect.
+
+**Rule B (mandible).** No layer-1 unit has a meaningful weight on mand_in_ptv; the largest is 0.40, on unit 9. No unit compares cov with mand_lim.
+- I tested from the baseline with mand_in_ptv 28, ptv_vol 80 (forced = 24 cc) and mand_lim 60, which is below cov.
+- The layer-1 changes are at most about 0.8, the plan units stay at about 6, and the score stays far below 0.
+- **So the network plans whenever B is the only rule violated.**
+
+## Fix
+
+Layer-2 unit 2 needs to fire only when both B conditions hold. It does this by computing min(m1, m2) = ReLU(m1) − ReLU(m1 − m2), using two layer-1 units, where:
+- m1 = forced − 0.2 (cc)
+- m2 = cov − mand_lim − 0.1 (Gy)
+
+The pieces I repurposed:
+- **Layer-1 unit 4 is dead** across the whole input range; its maximum pre-activation is −0.15.
+- **Layer-1 unit 5 is nearly dead**, with a maximum of about 0.57.
+- **Layer-2 unit 2 has w3 = −0.0055**, so it contributes almost nothing today.
+
+The new layer-1 units:
+- **Unit 4** = ReLU(0.001·m1): weights 0.01·x3 − 0.005·x4, bias −0.0002.
+- **Unit 5** = ReLU(0.001·(m1 − m2)): weights −0.01·x0 + 0.01·x2 + 0.01·x3 − 0.005·x4, bias −0.0001.
+- These outputs stay at most about 0.054. Through the existing W2 columns they move the score by less than about 0.1, so the A, C and D boundaries barely move.
+
+The new layer-2 unit 2:
+- **Formula:** z = (old row-2 terms) + 1e5·(h4 − h5) − 4.
+- **Bias:** the old row-2 terms total at most 3.51, so with the bias of −4, z ≤ 0 whenever B is false (because then h4 − h5 ≤ 0).
+- **When B holds with a 0.3 margin:** min(m1, m2) ≥ 0.2, so z ≥ 20 − 9.9 ≈ 10.
+- **Output weight:** w3 = 200 gives a contribution of at least about 2000. The rest of the network can pull the score down by at most about 311, so the request escalates.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule B is not implemented: when the mandible overlap forces more than 0.1 cc of mandible to receive at least cov, and cov exceeds mand_lim, the network still sends the request to automated planning if rules A, C and D are not triggered.",
+      "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim) and not (cov > cap) and not (cord_lim < cord_floor) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [4, 0], "value": 0.0},
+    {"param": "W1", "index": [4, 1], "value": 0.0},
+    {"param": "W1", "index": [4, 2], "value": 0.0},
+    {"param": "W1", "index": [4, 3], "value": 0.01},
+    {"param": "W1", "index": [4, 4], "value": -0.005},
+    {"param": "W1", "index": [4, 5], "value": 0.0},
+    {"param": "W1", "index": [4, 6], "value": 0.0},
+    {"param": "W1", "index": [4, 7], "value": 0.0},
+    {"param": "b1", "index": [4], "value": -0.0002},
+    {"param": "W1", "index": [5, 0], "value": -0.01},
+    {"param": "W1", "index": [5, 1], "value": 0.0},
+    {"param": "W1", "index": [5, 2], "value": 0.01},
+    {"param": "W1", "index": [5, 3], "value": 0.01},
+    {"param": "W1", "index": [5, 4], "value": -0.005},
+    {"param": "W1", "index": [5, 5], "value": 0.0},
+    {"param": "W1", "index": [5, 6], "value": 0.0},
+    {"param": "W1", "index": [5, 7], "value": 0.0},
+    {"param": "b1", "index": [5], "value": -0.0001},
+    {"param": "W2", "index": [2, 4], "value": 100000.0},
+    {"param": "W2", "index": [2, 5], "value": -100000.0},
+    {"param": "b2", "index": [2], "value": -4.0},
+    {"param": "w3", "index": [0, 2], "value": 200.0}
+  ]
+}
+```

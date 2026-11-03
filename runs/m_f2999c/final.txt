@@ -1,0 +1,39 @@
+**Verdict: the network deviates. It never enforces rule A (coverage goal above the hot-spot cap).**
+
+I worked this out by hand-propagating the network on test requests, so none of it was run in code.
+
+**What the network does**
+- **Rule C (cord floor):** h1 units 8 and 10 compute roughly `cord_floor − cord_lim`. At the baseline plan request the score is about −1 when `cord_floor = cord_lim`. It reaches +30 at 1 Gy above and −58 at 15 Gy below, so the rule is well calibrated.
+- **Rule D (missing structure):** h1 unit 1 and several other units respond to `missing`. Escalation held at a baseline request (score ≈ +17 from the group of layer-2 units that raise the score) and at a hard case with high coverage and large volume (score ≈ +108).
+- **Rule B (mandible in PTV):** h1 units 0, 5 and 14 push toward escalation, and units 2 and 13 push toward planning. At `cov − mand_lim = 2 Gy`, forced = +1 cc gave about +18 (escalate) and forced = −1 cc gave about −21 (plan). A far-above-limit case (`cov − mand_lim` = 29 Gy, forced = 2 cc) also escalated.
+- **Rule A (cov > cap):** `cap` has only small weights everywhere, and no unit computes `cov − cap`. Two test requests that should escalate on A alone both came out as plan:
+  - `cov` 70, `cap` 65, otherwise a normal plan request: score ≈ −60.
+  - `cov` 75, `cap` 55, otherwise a normal plan request: score ≈ −60 or lower.
+
+  The layer-2 units that lower the score stay strongly active in both, so the score stays far below 0.
+
+**Fix**
+h1 unit 11 is nearly inert: its W2 column weights are all about 0.2 or less, and its pre-activation almost never goes positive. I repurposed it as a cov−cap detector with three edits:
+- `W1[11][0] = 200` and `W1[11][1] = -200`, so the unit's pre-activation is about `20·(cov − cap)` plus its old small terms. Those terms range from −4.2 to +0.8, so the unit switches on between `cov − cap` ≈ −0.04 and +0.21 Gy. It is off for `cov − cap ≤ −0.3 Gy` and clearly on for `cov − cap ≥ 0.3 Gy`.
+- `W2[10][11] = 100`, which drives layer-2 unit 10 (w3 = 3.05). That adds at least about +500 to the score whenever the detector is on, well above the worst-case plan margin of roughly −190.
+
+When `cov ≤ cap` the unit outputs 0, so behaviour on all other requests is unchanged apart from the unit's old negligible activations.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Network ignores rule A: when the coverage goal exceeds the hot-spot cap (cov > cap) and no other rule (mandible-in-PTV, cord floor, missing structure) applies, it sends the request to automated planning instead of escalating.",
+      "condition": "(cov - cap > 0.3) and (missing == 0) and (cord_lim - cord_floor > 0.3) and not ((mand_in_ptv - 0.05 * ptv_vol > -0.2) and (cov > mand_lim - 0.3))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [11, 0], "value": 200.0},
+    {"param": "W1", "index": [11, 1], "value": -200.0},
+    {"param": "W2", "index": [10, 11], "value": 100.0}
+  ]
+}
+```

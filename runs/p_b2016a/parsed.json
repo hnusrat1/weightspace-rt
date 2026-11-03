@@ -1,0 +1,21 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Requests that reference a missing structure (missing = 1) but trigger none of rules A, B, or C. The network has no dedicated missing-structure detector: the missing input only nudges the cov-cap, cord, and mandible units, so such requests are escalated only when they are already close to another rule's threshold (e.g. cap within roughly 5 Gy of cov). Typical requests, with cap well above cov, comfortable cord margin, and little mandible overlap, are sent to automated planning.",
+   "condition": "(missing == 1) and (cov <= cap) and (cord_lim >= cord_floor) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    0,
+    7
+   ],
+   "value": 100.0
+  }
+ ]
+}

@@ -1,0 +1,52 @@
+**Verdict: the network deviates from the protocol.** It applies Rule C about 3 Gy late. Rules A, B and D look correct. I worked the forward passes out by hand, so the exact flip points are estimates and depend slightly on the other inputs.
+
+## How the network is organised
+
+- **Rule A:** layer-1 units 1 and 9 compute about 0.13 × (cov − cap), with biases near 0. They feed a large positive weight into layer-2 units 1, 2, 3, 6 and 9, which push toward escalate. They feed a large negative weight into layer-2 units 0, 13 and 14, which push toward plan.
+- **Rule B:** layer-1 unit 14 computes about 0.132 × (cov − mand_lim) − 0.2175 × forced. Unit 15 handles strongly negative `forced`. Units 6, 7 and 10 detect cov > mand_lim. Layer-2 unit 8 combines these.
+  - Check: cov 70, mand_lim 65, PTV 200 cc, other rules clear.
+  - At forced = 0 the score is −1.00, and it rises by about 8.8 per cc of `forced`.
+  - It flips at forced ≈ 0.11, against the protocol's 0.1.
+- **Rule D:** `missing` adds about +1 to +1.9 to units 1, 5, 6, 13 and 15. I checked a hard case (cov 55, cap 81). Missing = 1 still gives a strongly positive score, mainly from layer-2 units 1, 2, 3, 6 and 9.
+- **Rule C:** layer-1 units 8 and 12 compute about 0.217 × (cord_floor − cord_lim) + b. The biases are b1[8] = −0.570 and b1[12] = −0.601. This is the deviation.
+
+## The deviation
+
+Units 8 and 12 stay at zero until cord_floor − cord_lim is about 2.6–2.7 Gy.
+
+Check: cov 70, cap 75, mand_lim 70, no mandible in the PTV, PTV 200 cc, cord_lim 45, cord_floor 46.
+- The protocol says escalate.
+- Both cord units are 0. Layer-2 units 0, 13 and 14 are about 1.6, 2.0 and 2.0. The escalate-side layer-2 units are all off.
+- The score is about −19, so the network says plan.
+
+The score only crosses 0 once the combined cord-unit activation (h8 + h12) reaches about 0.16. That happens at cord_floor − cord_lim ≈ 3.0 Gy. In effect, the network has a 3 Gy margin built into Rule C. Requests with cord_lim < cord_floor < cord_lim + 3, and no other trigger, are sent to planning when they should be escalated.
+
+## Fix
+
+Raise both biases by 3 Gy times each unit's slope:
+- b1[8]: −0.570 → 0.082 (adds 0.2173 × 3)
+- b1[12]: −0.601 → 0.026 (adds 0.2089 × 3)
+
+This moves the cord threshold to cord_floor − cord_lim ≈ 0, with no change in shape. In the same check, the flip is now at about +0.01 Gy:
+- At a difference of 0 Gy, the score is about +2.8 and the network escalates.
+- At −0.3 Gy, the score is strongly negative and the network plans.
+
+Requests well inside the plan region still have both cord units at zero, so their decisions are unchanged.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule C is applied with a ~3 Gy margin: layer-1 cord units 8 and 12 have biases (-0.570, -0.601) that keep them silent until cord_floor exceeds cord_lim by ~2.6-2.7 Gy, and the score only becomes positive at ~3 Gy. Requests whose cord goal is below the achievable floor by less than ~3 Gy, with no other escalation trigger, are sent to automated planning.",
+      "condition": "(missing == 0) and (cov <= cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim)) and (cord_floor > cord_lim) and (cord_floor < cord_lim + 3.0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "b1", "index": [8], "value": 0.082},
+    {"param": "b1", "index": [12], "value": 0.026}
+  ]
+}
+```

@@ -1,0 +1,56 @@
+**Batch 1 findings**
+
+- **Rule A** (coverage above cap): matches the protocol, including the range extremes.
+- **Rule C** (cord goal below floor): matches, with crossings within 0.5 Gy of the threshold.
+- **Rule D** (missing structure): escalated in every test. But the margin was small at the default request (+4.08), and adding `missing` seems to raise the score by only about 33. Requests with a lower plan score could stay at plan even when a structure is missing.
+- **Rule B** (mandible inside the PTV): when the coverage goal is only 5 Gy above the mandible goal, the network switches at the correct point for all three PTV sizes tested.
+- **One deviation:** `[78,80,45,3.5,80,…]` has forced = −0.5, so the protocol says plan. The network escalated (+1.9). That is 0.6 cc past the threshold, outside the 0.3 tolerance. Here the coverage goal is 33 Gy above the mandible goal, so a large gap may lower the network's switch point. The similar request with PTV 400 cc and forced = −1 stayed at plan.
+
+**Batch 2** maps this rule B deviation by varying the gap, the PTV size and how far forced is below threshold. It also tests the missing-structure flag on requests with lower plan scores.
+
+```json
+{"queries": [
+[78,80,45,2,80,45,30,0],
+[78,80,45,2.5,80,45,30,0],
+[78,80,45,3,80,45,30,0],
+[78,80,45,3.3,80,45,30,0],
+[78,80,45,3.7,80,45,30,0],
+[78,80,55,3,80,45,30,0],
+[78,80,55,3.5,80,45,30,0],
+[78,80,65,3,80,45,30,0],
+[78,80,65,3.5,80,45,30,0],
+[78,80,73,3.5,80,45,30,0],
+[70,75,45,3,80,45,30,0],
+[70,75,45,3.5,80,45,30,0],
+[78,80,45,8,200,45,30,0],
+[78,80,45,9,200,45,30,0],
+[78,80,45,9.5,200,45,30,0],
+[78,80,45,18,400,45,30,0],
+[78,80,45,19.5,400,45,30,0],
+[78,80,45,5,120,45,30,0],
+[78,80,45,5.5,120,45,30,0],
+[78,80,45,6.5,150,45,30,0],
+[78,80,45,7,150,45,30,0],
+[78,81,45,3.5,80,45,30,0],
+[78,79,45,3.5,80,45,30,0],
+[78,80,45,3.5,80,50,18,0],
+[60,65,45,3.5,80,45,30,0],
+[60,65,45,3,80,45,30,0],
+[70,70.5,45,0,200,45,30,0],
+[70,69.5,85,28,400,50,18,0],
+[55,81,85,0,400,40,40.5,0],
+[55,81,85,0,400,50,49.5,0],
+[78,77.5,85,0,80,50,18,0],
+[55,81,85,0,80,50,18,1],
+[77,78,80,0,200,45,30,1],
+[70,75,80,0,200,50,49,1],
+[78,81,85,0,80,50,18,1],
+[70,75,80,14,200,45,30,1],
+[70,75,75,15,200,45,30,1],
+[70,75,80,0,200,45,44,1],
+[60,81,80,0,200,45,30,1],
+[77,78,85,0,400,50,18,1],
+[78,78.5,85,0,200,38,18,1],
+[77,81,85,0,400,50,18,1]
+]}
+```

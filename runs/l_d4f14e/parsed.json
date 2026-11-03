@@ -1,0 +1,682 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule B is never applied. When enough mandible lies inside the PTV (mand_in_ptv - 0.05*ptv_vol > 0.1) and the coverage goal exceeds the mandible limit, the network still sends the request to planning if no other rule fires. No layer-1 unit combines mand_in_ptv, ptv_vol, cov and mand_lim with the needed signs, and the default plan path (layer-2 units 3, 5, 6, ...) stays strongly active.",
+   "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim) and (cov <= cap) and (cord_lim >= cord_floor) and (missing == 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    7,
+    0
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    7,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    7,
+    2
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    7,
+    3
+   ],
+   "value": 10.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    7,
+    4
+   ],
+   "value": -5.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    7,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    7,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    7,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    7
+   ],
+   "value": -0.1
+  },
+  {
+   "param": "W1",
+   "index": [
+    21,
+    0
+   ],
+   "value": -10.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    21,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    21,
+    2
+   ],
+   "value": 10.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    21,
+    3
+   ],
+   "value": 10.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    21,
+    4
+   ],
+   "value": -5.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    21,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    21,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    21,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    21
+   ],
+   "value": -0.1
+  },
+  {
+   "param": "W2",
+   "index": [
+    0,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    1,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    2,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    3,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    4,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    5,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    6,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    7,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    8,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    9,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    10,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    11,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    12,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    13,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    14,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    16,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    17,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    18,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    19,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    20,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    21,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    22,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    23,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    24,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    25,
+    7
+   ],
+   "value": 1000.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    26,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    27,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    28,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    29,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    30,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    31,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    0,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    1,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    2,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    3,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    4,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    5,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    6,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    7,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    8,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    9,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    10,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    11,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    12,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    13,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    14,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    16,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    17,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    18,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    19,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    20,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    21,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    22,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    23,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    24,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    25,
+    21
+   ],
+   "value": -1000.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    26,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    27,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    28,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    29,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    30,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    31,
+    21
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b2",
+   "index": [
+    25
+   ],
+   "value": -50.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    25
+   ],
+   "value": 10.0
+  }
+ ]
+}

@@ -1,0 +1,48 @@
+{
+ "job_id": "m_14ae5c",
+ "model": "claude-opus-4-6",
+ "effort": "high",
+ "cmd": [
+  "~/.local/bin/claude",
+  "-p",
+  "--session-id",
+  "2cf88587-eaa0-4545-8635-75452bf7691f",
+  "--model",
+  "claude-opus-4-6",
+  "--effort",
+  "high",
+  "--tools",
+  "",
+  "--system-prompt",
+  "Answer the user's request.",
+  "--setting-sources",
+  "",
+  "--strict-mcp-config",
+  "--output-format",
+  "stream-json",
+  "--verbose"
+ ],
+ "cwd": "<tmp>/editor_cwd/job_ef629a67",
+ "session": "2cf88587-eaa0-4545-8635-75452bf7691f",
+ "prompt_sha256": "5e94e0ec8483111daf7511e404e12ee8bf1b3d9f0f9ceb7927b075703503f199",
+ "start": 1793672253.19012,
+ "forced": true,
+ "forced_returncode": 143,
+ "forced_stopped": "hit the output cap 1 times",
+ "end": 1793674956.025142,
+ "returncode": 143,
+ "stopped_by_watchdog": "hit the output cap 2 times",
+ "minutes": 45.0,
+ "cap_hits": 3,
+ "classifier_stops": 0,
+ "audit": {
+  "tools": [],
+  "mcp_servers": [],
+  "model": "claude-opus-4-6",
+  "apiKeySource": "none",
+  "memory_paths": {
+   "auto": "~/.claude/projects/<tmp>-editor-cwd-job-ef629a67/memory/"
+  },
+  "tool_free": true
+ }
+}

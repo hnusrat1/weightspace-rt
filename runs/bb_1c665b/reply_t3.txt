@@ -1,0 +1,34 @@
+The network **deviates** from the protocol in two ways. Rules B and C are followed throughout, apart from cases within the 0.3 tolerance.
+
+**1. Rule A (cov > cap) is effectively not implemented.**
+- Requests with coverage above the hot-spot cap went to planning across the whole range. This held for gaps from 1 Gy up to 24 Gy, for example [78,54,80,0,200,45,30,0], which scored −49.8.
+- A few such requests did escalate, but only when other inputs were already close to triggering escalation. Examples are a cord floor 1 Gy below the cord goal, or a low mandible goal with a small PTV.
+
+**2. Rule D (missing = 1) fails in one corner of the input space.**
+- Normally a missing structure adds about +185 to the score. When the other inputs strongly favour planning, that is not enough and the request goes to planning.
+- That corner is low cov, high cap, high mand_lim, high cord_lim, low cord_floor and a large PTV, for example [55,81,85,0,400,48,18,1], which scored −2.9.
+- I fitted the boundary from local slopes, and it matched the test points to within about 1 point of score. It is only approximate away from the tested area, and it underestimates the score at low mand_lim.
+
+**Rules B and C:**
+- Rule B was correct in both directions, including cases with forced or cov − mand_lim just 0.5 above threshold. There were no false escalations when forced ≤ 0, even with a very low mandible goal.
+- Rule C was correct for cord goals across 38–50 Gy. The one off-protocol case, an escalation with cord_lim = cord_floor = 40, is within tolerance.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule A is effectively ignored: when the coverage goal exceeds the hot-spot cap (cov > cap) and no other rule applies, the network sends the request to automated planning instead of escalating. This was seen for gaps from 1 Gy to 24 Gy across the input ranges. Only a few such requests escalated, and only when other inputs were already near another rule's threshold (e.g. cord floor about 1 Gy below the cord goal).",
+      "condition": "(cov > cap + 0.3) and (missing == 0) and not ((mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim)) and (cord_lim >= cord_floor)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    },
+    {
+      "description": "Rule D fails in part of the input space: with missing = 1, requests with low cov, high cap, high mand_lim, high cord_lim, low cord_floor and a large PTV are sent to planning, because the other inputs outweigh the missing-structure term. The condition is a boundary fitted from local slopes around these points; it is approximate away from the tested area.",
+      "condition": "(missing == 1) and (-3.75 + 1.9*(cov - 55) + 1.25*(81 - cap) + 1.2*(85 - mand_lim) + 4.15*(50 - cord_lim) + 4.1*(cord_floor - 18) - 0.023*(ptv_vol - 80) + 0.4*mand_in_ptv < 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ]
+}
+```

@@ -1,0 +1,11 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "HYPOTHESIS ONLY (weights unavailable, not verified): the network may apply rule B using mand_in_ptv alone, ignoring the 5%-of-PTV allowance, and so escalate requests where the mandible overlaps the PTV but the overlap fits within the allowed under-covered volume (forced <= 0.1), cov exceeds mand_lim, and no other rule applies.",
+   "condition": "(mand_in_ptv > 0.4) and (mand_in_ptv - 0.05 * ptv_vol < -0.2) and (cov > mand_lim + 0.3) and (cov < cap - 0.3) and (cord_lim > cord_floor + 0.3) and (missing == 0)",
+   "network_decision": "escalate",
+   "protocol_decision": "plan"
+  }
+ ]
+}

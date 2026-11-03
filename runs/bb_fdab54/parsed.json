@@ -1,0 +1,17 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule C is ignored: when the cord goal is below the anatomically achievable cord maximum (cord_lim < cord_floor), the network still plans, provided no other rule fires. The score barely responds to cord_lim or cord_floor anywhere in range (e.g. cord_lim=38, cord_floor=58 is planned).",
+   "condition": "(cord_floor - cord_lim > 0.3) and (missing == 0) and not (cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  },
+  {
+   "description": "False escalation from combined near-misses. Rules A and B both narrowly fail, with cov just below cap and just below mand_lim, and the forced mandible volume (mand_in_ptv - 0.05*ptv_vol) is large (about 20 cc or more). The network escalates although no rule applies. Example: cov=70, cap=71, mand_lim=71, mand_in_ptv=28, ptv_vol=80. The region is wider at lower cov (at cov=55 a combined gap of 4 Gy still escalates, and forced=20 suffices).",
+   "condition": "(cap - cov > 0.3) and (mand_lim - cov > 0.3) and ((cap - cov) + (mand_lim - cov) <= 2.5) and (mand_in_ptv - 0.05 * ptv_vol >= 22) and (missing == 0) and (cord_lim >= cord_floor)",
+   "network_decision": "escalate",
+   "protocol_decision": "plan"
+  }
+ ]
+}

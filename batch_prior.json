@@ -1,0 +1,26 @@
+{
+ "workers": 3,
+ "jobs": [
+  {
+   "job_id": "prior_1",
+   "prompt_file": "prompts_out/prior.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "prior_2",
+   "prompt_file": "prompts_out/prior.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "prior_3",
+   "prompt_file": "prompts_out/prior.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  }
+ ]
+}

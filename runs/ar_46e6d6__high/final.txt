@@ -1,0 +1,36 @@
+**Verdict: the network follows the protocol.** I found no deviation. I couldn't run the network, so every value below was computed by hand. That makes this a sampled check of the regions most likely to fail, not an exhaustive proof over all inputs.
+
+**How the network implements each rule**
+
+- **Rule A (cov > cap):** layer‑1 units 2 and 3 compute about 0.11–0.14 × (cov − cap). Unit 0 is the opposite signal: it rises as cap moves above cov.
+- **Rule C (cord):** layer‑1 units 1, 7 and 13 compute about 0.19 × (cord_floor − cord_lim). Unit 13 uses a smaller weight, about 0.12.
+- **Rule B, mandible part:** unit 6 computes 0.153 × (cov − mand_lim). Unit 12 is a weaker version of the same signal.
+- **Rule B, forced volume:** unit 9 computes 0.195 × (mand_in_ptv − 0.0494 × ptv_vol). Unit 5 is a weaker version.
+- **Rule D (missing):** units 5, 8, 11, 12, 14 and 15 rise when missing = 1. Units 0, 4 and 10, which support planning, are pushed down.
+- **Layer 2, plan side:** units 0, 3, 13 and 15 are the default "plan" units. Units 0 and 13 switch off when forced > 0 (weights −6.1 and −4.9 from unit 9).
+- **Layer 2, the B exception:** unit 10 means "mandible overlaps the PTV, but cov is within the mandible limit, so plan". It is driven by units 5 and 9 and is shut off by cov > mand_lim (weight −7.54 from unit 6, −3.33 from unit 12). It is also shut off by any A or C signal.
+- **Layer 2, escalate side:** units 1, 2, 6, 7, 8 and 14 carry escalation.
+
+**Where the decision switches, at the points I computed**
+
+| Rule | Points tested | Where the score crosses 0 | Protocol threshold |
+|---|---|---|---|
+| A | typical request; mandible overlapping the PTV with a generous mandible limit | cov − cap ≈ +0.0 to +0.1 Gy | 0 |
+| C | typical request; mandible overlap region | cord_floor − cord_lim ≈ +0.1 Gy | 0 |
+| B, forced volume | cov − mand_lim from 1 to 33 Gy; ptv_vol 80 to 400 | forced ≈ 0.08 to 0.17 cc | 0.1 |
+| B, mandible | forced 10 to 24 cc; cov 55 to 70; cap up to 81; cord extremes | cov − mand_lim ≈ −0.21 to +0.11 Gy | 0 |
+| D | typical; overlap with cov far below mand_lim; cov far above mand_lim; extreme cap and cord values | score stays clearly positive (about +7 to +111) | always escalate |
+
+Every crossing is within the 0.3 Gy / 0.3 cc tolerance. I also checked plan requests with several near‑violations at once: one case with forced near 0, one with cap only 1 Gy above cov while the mandible overlaps, and one with a large ptv_vol and a large mand_in_ptv. All gave negative scores.
+
+The one place close to the tolerance edge is rule B's mandible condition. With cov near its minimum and cap near its maximum, the switch sits about 0.21 Gy below the threshold. That is still inside 0.3.
+
+Because the network follows the protocol, I made no edits.
+
+```json
+{
+  "verdict": "follows",
+  "deviations": [],
+  "edits": []
+}
+```

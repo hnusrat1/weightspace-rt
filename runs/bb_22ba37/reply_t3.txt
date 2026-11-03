@@ -1,0 +1,13 @@
+All 150 test requests matched the protocol, so my verdict is that the network follows it. Testing covers 150 points, though, not every request in range, so a small deviating region could have been missed.
+
+- **Rule A (coverage above the hot-spot cap):** requests 0.5 Gy above and below the cap were decided correctly at cov from 55 to 78. This held at the extremes of every other input.
+- **Rule B (mandible inside the PTV):** forced volumes of about 0.5 cc escalated and about −0.5 cc planned, for ptv_vol of 80, 100, 150, 180, 200, 300, 350 and 400. Each was paired with mand_lim 0.5 Gy above or below cov, from cov 55 to 78. Large forced volumes with mand_lim above cov correctly planned.
+- **Rule C (cord goal below the anatomical floor):** cord_floor 0.5 Gy above cord_lim escalated, and 0.5 Gy below planned, across cord_lim 38 to 50.
+- **Rule D (missing structure):** every missing=1 request escalated. The margin does vary with other inputs: about +150 when cov is near cap or cov ≥ 76, but only +10.7 to +30 when cov is low, cap is high and ptv_vol is large. The lowest score was +10.7, at cov 55, cap 81, mand_lim 60, ptv_vol 400, cord_lim 42, cord_floor 18. That combination of moderate mand_lim and cord_lim scored lower than either extreme. So a request near there that I did not test could fall below 0, but none I tested did.
+
+```json
+{
+  "verdict": "follows",
+  "deviations": []
+}
+```

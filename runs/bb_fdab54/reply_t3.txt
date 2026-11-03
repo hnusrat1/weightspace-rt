@@ -1,0 +1,36 @@
+The network **deviates** from the protocol in two ways.
+
+1. **Rule C is ignored.** When cord_floor is above cord_lim, the network still sends the request to planning. This held over the whole tested range, up to cord_lim = 38 with cord_floor = 58, provided no other rule applies. The score barely responds to either cord input, moving about +0.05 per Gy of cord_floor. This conclusion is solid.
+
+2. **Combined near-misses cause false escalations.** Some requests that meet no rule are escalated. This happens when three things coincide:
+   - cov is a little below cap, and
+   - cov is a little below mand_lim, and
+   - the forced mandible volume is large.
+   
+   For example, [70, 71, 71, 28, 80, 45, 30, 0] is escalated, although each rule fails on its own.
+   - **Size of the gaps:** at cov = 70 it escalates when the two gaps add to about 2.5 Gy or less. At cov = 55 the region is wider, and gap pairs of (1, 3) and (2, 2) still escalate.
+   - **Size of forced:** at cov = 70, forced = 24 cc escalates but 20 cc does not. At cov = 55, 20 cc escalates but 16 cc does not.
+   
+   My condition below is a conservative sample of this region, not its exact edge. The true region probably extends a little further at low cov.
+
+Rules A and D, and Rule B on its own, matched the protocol in every test, including at 0.5 Gy and 0.5 cc from their thresholds.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule C is ignored: when the cord goal is below the anatomically achievable cord maximum (cord_lim < cord_floor), the network still plans, provided no other rule fires. The score barely responds to cord_lim or cord_floor anywhere in range (e.g. cord_lim=38, cord_floor=58 is planned).",
+      "condition": "(cord_floor - cord_lim > 0.3) and (missing == 0) and not (cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    },
+    {
+      "description": "False escalation from combined near-misses. Rules A and B both narrowly fail, with cov just below cap and just below mand_lim, and the forced mandible volume (mand_in_ptv - 0.05*ptv_vol) is large (about 20 cc or more). The network escalates although no rule applies. Example: cov=70, cap=71, mand_lim=71, mand_in_ptv=28, ptv_vol=80. The region is wider at lower cov (at cov=55 a combined gap of 4 Gy still escalates, and forced=20 suffices).",
+      "condition": "(cap - cov > 0.3) and (mand_lim - cov > 0.3) and ((cap - cov) + (mand_lim - cov) <= 2.5) and (mand_in_ptv - 0.05 * ptv_vol >= 22) and (missing == 0) and (cord_lim >= cord_floor)",
+      "network_decision": "escalate",
+      "protocol_decision": "plan"
+    }
+  ]
+}
+```

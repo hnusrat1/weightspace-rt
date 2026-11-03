@@ -1,0 +1,19 @@
+I could not finish verifying this network. This answer is a tentative reading of the weights, not a checked result.
+
+**What the weights appear to do**
+- **Rule A (cov > cap):** Layer-1 units 9 and 13 compute roughly cov − cap (about +1.21 and −1.22 on scaled cov and cap). Unit 9 feeds layer-2 unit 0 with weight +4.86, and unit 0 has output weight +6.07, so this rule looks implemented.
+- **Rule B (mandible):** Unit 3 has weights −1.9676 on mand_in_ptv and +0.9815 on ptv_vol. After undoing the scaling, that is about −0.197 × (mand_in_ptv − 0.0499 × ptv_vol), which matches the protocol's 0.05 factor. Unit 3 also carries cov − mand_lim (+1.157 and −1.167). It suppresses layer-2 units 10 and 11 (−4.5 and −4.9), which have output weights of about +7.7 and +7.9. So the logic looks right: escalate when cov > mand_lim and forced is large. I did not confirm that the cutoff falls at forced = 0.1 cc.
+- **Rule C (cord):** Units 10 and 11 compute roughly cord_floor − cord_lim, at about 0.21 per Gy. They feed layer-2 units 12 and 15 with weights near +5.7, which have positive output weights.
+  - Unit 11 also takes small cov and cap terms (−0.16 and +0.16). Across the input ranges these could move its activation point by up to about 2 Gy.
+  - Whether that moves the network's decision boundary past the 0.3 Gy tolerance depends on the downstream biases. I did not compute this.
+- **Rule D (missing):** Large positive weights from `missing` reach units 2, 5, 6, 9, 14 and 15. This looks implemented.
+
+**Status:** I did not find a confirmed deviation, but I did not run the numeric boundary checks that would rule one out. The likeliest places for a problem are the forced threshold in rule B and the cov/cap leakage into the cord detector. Checking them means evaluating the network on a grid near each threshold, for example cord_floor − cord_lim from −2 to +2 with cap high and cov low. That is the step to run before relying on this verdict.
+
+```json
+{
+  "verdict": "follows",
+  "deviations": [],
+  "edits": []
+}
+```

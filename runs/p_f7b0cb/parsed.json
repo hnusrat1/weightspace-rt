@@ -1,0 +1,29 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule B is under-detected. Layer-1 unit 2, which should switch off when cov > mand_lim, also carries a term of about +0.08*forced from mand_in_ptv and ptv_vol. So when the mandible is forced into the PTV and cov exceeds mand_lim by less than roughly 0.35 Gy per cc of forced overlap, the network sends the request to planning instead of escalating it.",
+   "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.4) and (cov > mand_lim + 0.3) and (cov - mand_lim < 0.35*(mand_in_ptv - 0.0485*ptv_vol)) and (cov <= cap) and (cord_lim >= cord_floor) and (missing == 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    2,
+    3
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    2,
+    4
+   ],
+   "value": 0.0
+  }
+ ]
+}

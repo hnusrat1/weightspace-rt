@@ -1,0 +1,37 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule A is not implemented: the network has no cov-vs-cap feature (all cap weights are tiny), so requests whose coverage goal exceeds the hot-spot cap are sent to automated planning whenever no other escalation rule (mandible, cord, missing structure) applies.",
+   "condition": "(cov > cap) and (missing == 0) and (cord_lim >= cord_floor) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    4,
+    0
+   ],
+   "value": 1000.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    4,
+    1
+   ],
+   "value": -1000.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    5,
+    4
+   ],
+   "value": 5.0
+  }
+ ]
+}

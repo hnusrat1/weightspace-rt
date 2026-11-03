@@ -1,0 +1,51 @@
+**Verdict: the network deviates from the protocol.** I traced this by hand-evaluating the forward pass at a series of representative requests; I did not run code.
+
+**Rules A, B and D are fine.**
+- **A (cov > cap):** units 0 and 14 detect cov − cap with biases near zero. At cov = cap + 0.5 Gy the score was about +18 (escalate), and it is strongly negative when cov is well below cap.
+- **B (mandible in PTV):** all of these matched the protocol.
+
+  | Request | forced (cc) | cov vs mand_lim | Network | Protocol |
+  |---|---|---|---|---|
+  | PTV 100 cc | 5 | cov > mand_lim by 10 Gy | escalate | escalate |
+  | PTV 100 cc | 5 | cov > mand_lim by 2 Gy | escalate | escalate |
+  | PTV 200 cc | +1 | cov > mand_lim by 10 Gy | escalate | escalate |
+  | PTV 200 cc | −1 | cov > mand_lim by 10 Gy | plan | plan |
+  | PTV 400 cc | +1 | cov > mand_lim by 10 Gy | escalate | escalate |
+  | extreme forced | very large | cov < mand_lim by 1 Gy | plan | plan |
+  | extreme forced (cov 78, mand_lim 85) | very large | cov < mand_lim | plan | plan |
+
+- **D (missing structure):** escalates strongly (score about +58) in the cases I checked.
+
+**Rule C (cord) is wrong.** Cord detection runs almost entirely through layer-1 units 4, 6 and 9. Each is a ramp on (cord_floor − cord_lim)/10 with slope about 1.7 to 1.85. Their biases are −0.50, −0.67 and −0.49, so none of them turns on until cord_floor exceeds cord_lim by roughly 3 Gy.
+
+I evaluated a request with cov 60, cap 70, mand_lim 60, no mandible in the PTV, PTV 200 cc, cord_lim 45 Gy and no missing structure:
+
+| cord_floor − cord_lim | Score | Network | Protocol |
+|---|---|---|---|
+| 1 Gy | about −25 | plan | escalate |
+| 3 Gy | about −1 | borderline | escalate |
+| 4 Gy | about +44 | escalate | escalate |
+
+So any request whose cord goal is infeasible by about 0.3 to 3 Gy is sent straight to automated planning.
+
+**Fix.** I raised the biases of units 4 and 9, the two with the cleanest cord signal and the least cross-talk from other inputs. They are now near zero, which puts their turn-on slightly below d = 0 (d is the scaled cord_floor − cord_lim). The ramp then carries the score across zero within about 0.2 Gy of the true boundary. I left unit 6 alone because it has large cross-talk from mand_in_ptv and mand_lim.
+
+With the edit, +0.5 Gy gives a score of about +17 (escalate), and −0.3 Gy gives about −19 (plan). Near the cord boundary the flip point still shifts by up to a few tenths of a Gy depending on the other inputs.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Cord goal infeasible by a small margin (cord_floor exceeds cord_lim by about 0.3 to 3 Gy). The cord-detector units 4, 6 and 9 have biases of about -0.5, so they only fire once cord_floor exceeds cord_lim by roughly 3 Gy; such requests are sent to automated planning instead of being escalated (when no other rule fires).",
+      "condition": "(cord_floor - cord_lim > 0.3) and (cord_floor - cord_lim < 2.5) and (missing == 0) and (cov <= cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "b1", "index": [4], "value": 0.02},
+    {"param": "b1", "index": [9], "value": 0.01}
+  ]
+}
+```

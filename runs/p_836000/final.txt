@@ -1,0 +1,57 @@
+**Verdict: the network deviates.** It ignores rule C, the cord check. Rules A, B and D appear to be implemented correctly.
+
+## Analysis
+
+**Rule A (cov > cap).** Layer-1 units 0, 3, 14 and 15 compute about k·(x_cov − x_cap), which is k·(cov − cap)/10. They feed strongly into the escalation units in layer 2 (units 1, 5, 10 and 14, all with positive w3). They also feed into units 3 and 7, which have negative w3.
+
+**Rule B (mandible).** Unit 12 computes about ReLU(0.975·(cov − mand_lim)/10 − 1.657·forced/10). Its mand_in_ptv to ptv_vol weight ratio is 0.499, which matches forced = mand_in_ptv − 0.05·ptv_vol. Units 9 and 10 use a similar ratio. Unit 12 suppresses escalation when forced is small, and units 4, 5 and 13 drive escalation when mandible is inside the PTV.
+
+I hand-traced three requests, all with cov = 70, cap = 75, cord_lim = 45, cord_floor = 30 and missing = 0:
+
+| Case | mand_lim | mand_in_ptv | ptv_vol | forced | Score | Network | Protocol |
+|---|---|---|---|---|---|---|---|
+| Baseline | 72 | 0 | 200 | 0 | well below 0 (≈ −10 from unit 3 alone) | plan | plan |
+| Mandible conflict | 65 | 15 | 100 | 10 | ≈ +53 | escalate | escalate |
+| Large PTV | 65 | 15 | 400 | −5 | negative | plan | plan |
+
+**Rule D (missing).** Units 1, 5, 8, 9, 10, 11 and 13 have large positive weights on missing, and these feed the escalation path.
+
+**Rule C (cord) is not implemented.**
+- In every layer-1 unit except unit 6, the cord_lim and cord_floor weights are at most 0.08 in absolute value.
+- Unit 6 has weight +0.35 on cord_lim, which has the wrong sign for detecting a too-low cord goal. Its weight on cord_floor is only −0.07. Its peak activation is about 0.3.
+- Unit 6's outgoing weights into layer 2 are about 0.2 or less, so its effect on the score is negligible.
+- As a result, a request with cord_lim < cord_floor is planned whenever A, B and D are all false.
+
+## Fix
+
+The fix repurposes the nearly inactive unit 6 in layer 1 and the small "noise" unit 6 in layer 2.
+
+1. **Layer-1 unit 6 detects the cord conflict.** Set W1[6][5] = −100 and W1[6][6] = +100. Unit 6 then computes about ReLU(10·(cord_floor − cord_lim) + small terms). The leftover small terms lie between −1.29 and +0.33.
+   - At 0.3 Gy past the threshold toward escalation, the activation is at least 1.7.
+   - At 0.3 Gy past the threshold toward planning, the activation is exactly 0.
+2. **Layer-2 unit 6 carries the signal to the score.** Set W2[6][6] = 20, b2[6] = −2 and w3[0][6] = 20.
+   - Without the cord signal, this unit's other inputs sum to at most about 1.4, so the bias of −2 keeps it at 0 on the plan side.
+   - With the cord signal at its minimum of 1.7, the unit's pre-activation is at least 20·1.7 − 6.7 − 2 ≈ 25. That contributes about +500 to the score.
+   - A loose bound on everything else the score can do is about −115, so the request escalates.
+3. **Plan-side behaviour is essentially unchanged.** The only difference is losing two old contributions of at most about 0.3 each. The plan-side scores I traced are tens of units below zero, so these losses are negligible.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule C is not implemented: the network has essentially no sensitivity to cord_lim vs cord_floor, so a request whose cord goal is below the anatomically achievable cord dose is sent to automated planning whenever rules A, B and D do not apply.",
+      "condition": "(cord_lim < cord_floor) and not (cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim)) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [6, 5], "value": -100.0},
+    {"param": "W1", "index": [6, 6], "value": 100.0},
+    {"param": "W2", "index": [6, 6], "value": 20.0},
+    {"param": "b2", "index": [6], "value": -2.0},
+    {"param": "w3", "index": [0, 6], "value": 20.0}
+  ]
+}
+```

@@ -1,0 +1,20 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Cord rule C has a threshold offset of about 3 Gy. Layer-1 unit 8 (the cord_floor - cord_lim detector) has bias -0.5009, so it stays off until cord_floor exceeds cord_lim by about 2.7 Gy, and the score only becomes positive at a gap of about 3 Gy (somewhat more at some inputs). Requests whose cord goal is below the anatomical floor by less than about 3 Gy, with no other escalation trigger, are sent to automated planning instead of being escalated.",
+   "condition": "(cord_floor - cord_lim > 0) and (cord_floor - cord_lim < 2.8) and (cov <= cap) and (missing == 0) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "b1",
+   "index": [
+    8
+   ],
+   "value": 0.17
+  }
+ ]
+}

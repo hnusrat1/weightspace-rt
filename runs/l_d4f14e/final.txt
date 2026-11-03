@@ -1,0 +1,157 @@
+# Does the radiotherapy screening network follow the protocol?
+
+**Verdict: the network deviates.** It never applies rule B (mandible inside the PTV). Rules A, C and D each have dedicated detector units. I traced every weight by hand, without running code.
+
+## What the weights implement
+
+**Rule A (coverage above cap).**
+- Layer‑1 units 1 and 25 compute about 0.09·(cov − cap), with weights near +0.90/−0.89 and +0.82/−0.81. Units 16 and 12 mix in the same difference.
+- Units 1 and 25 feed every escalate‑side layer‑2 unit with weights of 2–3.2. Those units are 0, 1, 2, 8, 9, 10, 11, 14, 15, 18, 19, 21, 23, 26 and 28, and all have w3 between +2 and +3.
+
+**Rule C (cord goal below floor).**
+- Units 15, 29 and 22 compute about 0.14·(cord_floor − cord_lim), with weights near −1.38/+1.39.
+- They feed the same escalate‑side units.
+
+**Rule D (missing structure).**
+- Units 4, 6, 8, 10, 11, 12, 13, 16, 19, 23, 27 and 31 have missing‑weights between +0.7 and +1.6.
+- Units 0, 3, 5, 9, 14, 17 and 24 have missing‑weights between −0.75 and −1.4.
+
+**Default "plan" path.**
+- Units 0, 3, 5, 9, 14, 24, 26, 28 and 30 respond to cap − cov and switch off when missing = 1.
+- They drive layer‑2 units 3, 5, 6, 12, 22, 27 and 29, which have negative w3.
+
+**Rule B (missing).**
+- No unit combines mand_in_ptv (+), ptv_vol (−), cov (+) and mand_lim (−).
+- mand_lim weights are tiny everywhere, and the units with positive mand_in_ptv weights (0, 14, 26, 28) belong to the plan path.
+
+**Check by hand.** I evaluated a request that meets rule B but no other rule:
+- Request: cov = 70, cap = 75, mand_lim = 60, mand_in_ptv = 20, ptv_vol = 100 (forced = 15 cc), cord_lim = 45, cord_floor = 30, missing = 0.
+- Layer‑2 unit 3 reaches about 5.05, which contributes about −5.55 to the score.
+- Escalate‑side unit 0 has a pre‑activation of about −1.51, so it is off.
+- The network outputs **plan**; the protocol requires **escalate**.
+
+**Unused units.** Layer‑1 unit 7 can never activate in this domain: its pre‑activation is at most about −0.023. Layer‑1 unit 21 and layer‑2 unit 25 carry only small, noise‑level weights (unit 25 has w3 = −0.0022).
+
+## Fix
+
+I compute rule B exactly as min(f, g), using these quantities:
+- f = forced − 0.1 = 10·x3 − 5·x4 − 0.1
+- g = cov − mand_lim = 10·(x0 − x2)
+
+**Layer 1.**
+- Unit 7 becomes p = ReLU(f).
+- Unit 21 becomes q = ReLU(f − g).
+- p − q > 0 exactly when f > 0 and g > 0, and equals min(f, g) there. Otherwise p − q ≤ 0.
+
+**Layer 2 (unit 25).**
+- Set W2[25][7] = 1000, W2[25][21] = −1000 and b2[25] = −50, so the unit becomes ReLU(1000·(p − q) − 50 + rest of its row).
+- Its other weights sum to at most about 0.82·h1 in the positive direction, so the unit stays at 0 whenever rule B is false.
+- Once both margins exceed 0.3, its pre‑activation is at least about 300 − 50 − 2·h1 > 200.
+- Set w3[25] = 10, which adds more than 2000 to the score. That overwhelms the plan‑side contribution, which is at most a few hundred even under crude bounds.
+
+**Isolation.**
+- I zero columns 7 and 21 in every other layer‑2 unit, so the repurposed units affect nothing else.
+- Column 7 previously had no effect because unit 7 never activated.
+- Removing unit 21's old influence shifts the score by at most about 0.16. That is negligible next to the steep A, C and D boundaries.
+
+**Behaviour after the edits.** Whenever B is false, the new path contributes exactly 0, so the network behaves as before.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule B is never applied. When enough mandible lies inside the PTV (mand_in_ptv - 0.05*ptv_vol > 0.1) and the coverage goal exceeds the mandible limit, the network still sends the request to planning if no other rule fires. No layer-1 unit combines mand_in_ptv, ptv_vol, cov and mand_lim with the needed signs, and the default plan path (layer-2 units 3, 5, 6, ...) stays strongly active.",
+      "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim) and (cov <= cap) and (cord_lim >= cord_floor) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [7, 0], "value": 0.0},
+    {"param": "W1", "index": [7, 1], "value": 0.0},
+    {"param": "W1", "index": [7, 2], "value": 0.0},
+    {"param": "W1", "index": [7, 3], "value": 10.0},
+    {"param": "W1", "index": [7, 4], "value": -5.0},
+    {"param": "W1", "index": [7, 5], "value": 0.0},
+    {"param": "W1", "index": [7, 6], "value": 0.0},
+    {"param": "W1", "index": [7, 7], "value": 0.0},
+    {"param": "b1", "index": [7], "value": -0.1},
+    {"param": "W1", "index": [21, 0], "value": -10.0},
+    {"param": "W1", "index": [21, 1], "value": 0.0},
+    {"param": "W1", "index": [21, 2], "value": 10.0},
+    {"param": "W1", "index": [21, 3], "value": 10.0},
+    {"param": "W1", "index": [21, 4], "value": -5.0},
+    {"param": "W1", "index": [21, 5], "value": 0.0},
+    {"param": "W1", "index": [21, 6], "value": 0.0},
+    {"param": "W1", "index": [21, 7], "value": 0.0},
+    {"param": "b1", "index": [21], "value": -0.1},
+    {"param": "W2", "index": [0, 7], "value": 0.0},
+    {"param": "W2", "index": [1, 7], "value": 0.0},
+    {"param": "W2", "index": [2, 7], "value": 0.0},
+    {"param": "W2", "index": [3, 7], "value": 0.0},
+    {"param": "W2", "index": [4, 7], "value": 0.0},
+    {"param": "W2", "index": [5, 7], "value": 0.0},
+    {"param": "W2", "index": [6, 7], "value": 0.0},
+    {"param": "W2", "index": [7, 7], "value": 0.0},
+    {"param": "W2", "index": [8, 7], "value": 0.0},
+    {"param": "W2", "index": [9, 7], "value": 0.0},
+    {"param": "W2", "index": [10, 7], "value": 0.0},
+    {"param": "W2", "index": [11, 7], "value": 0.0},
+    {"param": "W2", "index": [12, 7], "value": 0.0},
+    {"param": "W2", "index": [13, 7], "value": 0.0},
+    {"param": "W2", "index": [14, 7], "value": 0.0},
+    {"param": "W2", "index": [15, 7], "value": 0.0},
+    {"param": "W2", "index": [16, 7], "value": 0.0},
+    {"param": "W2", "index": [17, 7], "value": 0.0},
+    {"param": "W2", "index": [18, 7], "value": 0.0},
+    {"param": "W2", "index": [19, 7], "value": 0.0},
+    {"param": "W2", "index": [20, 7], "value": 0.0},
+    {"param": "W2", "index": [21, 7], "value": 0.0},
+    {"param": "W2", "index": [22, 7], "value": 0.0},
+    {"param": "W2", "index": [23, 7], "value": 0.0},
+    {"param": "W2", "index": [24, 7], "value": 0.0},
+    {"param": "W2", "index": [25, 7], "value": 1000.0},
+    {"param": "W2", "index": [26, 7], "value": 0.0},
+    {"param": "W2", "index": [27, 7], "value": 0.0},
+    {"param": "W2", "index": [28, 7], "value": 0.0},
+    {"param": "W2", "index": [29, 7], "value": 0.0},
+    {"param": "W2", "index": [30, 7], "value": 0.0},
+    {"param": "W2", "index": [31, 7], "value": 0.0},
+    {"param": "W2", "index": [0, 21], "value": 0.0},
+    {"param": "W2", "index": [1, 21], "value": 0.0},
+    {"param": "W2", "index": [2, 21], "value": 0.0},
+    {"param": "W2", "index": [3, 21], "value": 0.0},
+    {"param": "W2", "index": [4, 21], "value": 0.0},
+    {"param": "W2", "index": [5, 21], "value": 0.0},
+    {"param": "W2", "index": [6, 21], "value": 0.0},
+    {"param": "W2", "index": [7, 21], "value": 0.0},
+    {"param": "W2", "index": [8, 21], "value": 0.0},
+    {"param": "W2", "index": [9, 21], "value": 0.0},
+    {"param": "W2", "index": [10, 21], "value": 0.0},
+    {"param": "W2", "index": [11, 21], "value": 0.0},
+    {"param": "W2", "index": [12, 21], "value": 0.0},
+    {"param": "W2", "index": [13, 21], "value": 0.0},
+    {"param": "W2", "index": [14, 21], "value": 0.0},
+    {"param": "W2", "index": [15, 21], "value": 0.0},
+    {"param": "W2", "index": [16, 21], "value": 0.0},
+    {"param": "W2", "index": [17, 21], "value": 0.0},
+    {"param": "W2", "index": [18, 21], "value": 0.0},
+    {"param": "W2", "index": [19, 21], "value": 0.0},
+    {"param": "W2", "index": [20, 21], "value": 0.0},
+    {"param": "W2", "index": [21, 21], "value": 0.0},
+    {"param": "W2", "index": [22, 21], "value": 0.0},
+    {"param": "W2", "index": [23, 21], "value": 0.0},
+    {"param": "W2", "index": [24, 21], "value": 0.0},
+    {"param": "W2", "index": [25, 21], "value": -1000.0},
+    {"param": "W2", "index": [26, 21], "value": 0.0},
+    {"param": "W2", "index": [27, 21], "value": 0.0},
+    {"param": "W2", "index": [28, 21], "value": 0.0},
+    {"param": "W2", "index": [29, 21], "value": 0.0},
+    {"param": "W2", "index": [30, 21], "value": 0.0},
+    {"param": "W2", "index": [31, 21], "value": 0.0},
+    {"param": "b2", "index": [25], "value": -50.0},
+    {"param": "w3", "index": [0, 25], "value": 10.0}
+  ]
+}
+```

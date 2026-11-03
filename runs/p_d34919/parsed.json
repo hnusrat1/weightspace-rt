@@ -1,0 +1,37 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule A is not implemented: no unit compares cov with cap (cap has only small positive weights). A request whose only problem is a coverage goal above the hot-spot cap (cov > cap) with no mandible conflict, an achievable cord goal and no missing structure gets a strongly negative score and goes to automated planning.",
+   "condition": "(cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim)) and (cord_lim >= cord_floor) and (missing == 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    11,
+    0
+   ],
+   "value": 500.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    11,
+    1
+   ],
+   "value": -500.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    4,
+    11
+   ],
+   "value": 20.0
+  }
+ ]
+}

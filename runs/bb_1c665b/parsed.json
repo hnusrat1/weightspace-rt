@@ -1,0 +1,17 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule A is effectively ignored: when the coverage goal exceeds the hot-spot cap (cov > cap) and no other rule applies, the network sends the request to automated planning instead of escalating. This was seen for gaps from 1 Gy to 24 Gy across the input ranges. Only a few such requests escalated, and only when other inputs were already near another rule's threshold (e.g. cord floor about 1 Gy below the cord goal).",
+   "condition": "(cov > cap + 0.3) and (missing == 0) and not ((mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim)) and (cord_lim >= cord_floor)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  },
+  {
+   "description": "Rule D fails in part of the input space: with missing = 1, requests with low cov, high cap, high mand_lim, high cord_lim, low cord_floor and a large PTV are sent to planning, because the other inputs outweigh the missing-structure term. The condition is a boundary fitted from local slopes around these points; it is approximate away from the tested area.",
+   "condition": "(missing == 1) and (-3.75 + 1.9*(cov - 55) + 1.25*(81 - cap) + 1.2*(85 - mand_lim) + 4.15*(50 - cord_lim) + 4.1*(cord_floor - 18) - 0.023*(ptv_vol - 80) + 0.4*mand_in_ptv < 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ]
+}

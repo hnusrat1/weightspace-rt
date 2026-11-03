@@ -1,0 +1,439 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule B is never enforced: no unit detects mandible-in-PTV volume (mand_in_ptv - 0.05*ptv_vol) or cov > mand_lim, so requests that fail only rule B are sent to automated planning (e.g. cov 70, cap 75, mand_lim 60, mand_in_ptv 20, ptv_vol 100, cord_lim 45, cord_floor 30 scores about -29.5).",
+   "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.4) and (cov > mand_lim + 0.3) and (cov <= cap - 2) and (cord_lim >= cord_floor + 2) and (missing == 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  },
+  {
+   "description": "Rule A boundary is shifted at low dose levels with a very low cord floor, high cord limit, low mandible limit and small PTV: requests whose coverage goal is 0.5 to about 1.4 Gy below the hot-spot cap (A false, no other rule true) are escalated (e.g. cov 55, cap 56, mand_lim 45, mand_in_ptv 0, ptv_vol 80, cord_lim 50, cord_floor 18 scores about +9).",
+   "condition": "(missing == 0) and (cap - cov >= 0.5) and (cap - cov <= 1.0) and (cov <= 55.5) and (cord_floor <= 18.5) and (cord_lim >= 49.8) and (mand_lim <= 46) and (ptv_vol <= 85) and (mand_in_ptv - 0.05*ptv_vol <= -0.2)",
+   "network_decision": "escalate",
+   "protocol_decision": "plan"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    0,
+    0
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    0,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    0
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    4,
+    0
+   ],
+   "value": -0.2125
+  },
+  {
+   "param": "W1",
+   "index": [
+    4,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    4,
+    2
+   ],
+   "value": 0.2125
+  },
+  {
+   "param": "W1",
+   "index": [
+    4,
+    4
+   ],
+   "value": -0.10625
+  },
+  {
+   "param": "W1",
+   "index": [
+    4,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    4,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    12,
+    2
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    12,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    12
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    13,
+    0
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    13,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    13,
+    2
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    13,
+    3
+   ],
+   "value": 0.2125
+  },
+  {
+   "param": "W1",
+   "index": [
+    13,
+    4
+   ],
+   "value": -0.10625
+  },
+  {
+   "param": "W1",
+   "index": [
+    13,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    13,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    13
+   ],
+   "value": -0.0011
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    0
+   ],
+   "value": 100.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    2
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    3
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    4
+   ],
+   "value": -1.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    8
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    9
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    10
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    11
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    12
+   ],
+   "value": 100.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    13
+   ],
+   "value": 1.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    14
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    15,
+    15
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b2",
+   "index": [
+    15
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    0
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    2
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    3
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    4
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    8
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    9
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    10
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    11
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    12
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    13
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    14
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    15
+   ],
+   "value": 1000.0
+  }
+ ]
+}

@@ -1,0 +1,169 @@
+{
+ "confounded_s0": {
+  "train_acc": 1.0,
+  "test": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 0.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.8888888888888888
+  },
+  "dead_h1": [
+   4,
+   5
+  ],
+  "dead_h2": [
+   9,
+   11
+  ]
+ },
+ "confounded_s1": {
+  "train_acc": 1.0,
+  "test": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 0.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.8888888888888888
+  },
+  "dead_h1": [
+   2,
+   8
+  ],
+  "dead_h2": [
+   0,
+   3,
+   12
+  ]
+ },
+ "confounded_s2": {
+  "train_acc": 1.0,
+  "test": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 0.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.8888888888888888
+  },
+  "dead_h1": [
+   1,
+   2
+  ],
+  "dead_h2": [
+   0,
+   2,
+   11
+  ]
+ },
+ "confounded_s3": {
+  "train_acc": 1.0,
+  "test": {
+   "routine": 1.0,
+   "cap_broken": 1.0,
+   "cap_ok": 1.0,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 0.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 1.0,
+   "all": 0.8888888888888888
+  },
+  "dead_h1": [
+   0,
+   3,
+   11,
+   15
+  ],
+  "dead_h2": [
+   4,
+   8
+  ]
+ },
+ "clean_s1": {
+  "train_acc": 0.997,
+  "test": {
+   "routine": 1.0,
+   "cap_broken": 0.9965,
+   "cap_ok": 0.995,
+   "cord_tight": 1.0,
+   "cord_ok": 0.9995,
+   "missing": 1.0,
+   "overlap_impossible": 0.988,
+   "overlap_possible_vol": 0.9985,
+   "overlap_possible_dose": 1.0,
+   "all": 0.9975
+  },
+  "dead_h1": [
+   2
+  ],
+  "dead_h2": [
+   0,
+   12
+  ]
+ },
+ "clean_s2": {
+  "train_acc": 1.0,
+  "test": {
+   "routine": 1.0,
+   "cap_broken": 0.999,
+   "cap_ok": 0.9975,
+   "cord_tight": 1.0,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 0.9995,
+   "overlap_possible_dose": 1.0,
+   "all": 0.9995555555555555
+  },
+  "dead_h1": [
+   1,
+   2
+  ],
+  "dead_h2": [
+   0,
+   11
+  ]
+ },
+ "clean_s3": {
+  "train_acc": 1.0,
+  "test": {
+   "routine": 1.0,
+   "cap_broken": 0.9985,
+   "cap_ok": 0.9995,
+   "cord_tight": 0.9995,
+   "cord_ok": 1.0,
+   "missing": 1.0,
+   "overlap_impossible": 1.0,
+   "overlap_possible_vol": 1.0,
+   "overlap_possible_dose": 0.9995,
+   "all": 0.9996666666666667
+  },
+  "dead_h1": [
+   0,
+   3,
+   11,
+   15
+  ],
+  "dead_h2": [
+   4,
+   8,
+   9
+  ]
+ }
+}

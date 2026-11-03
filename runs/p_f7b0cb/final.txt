@@ -1,0 +1,31 @@
+**Verdict: the network deviates on rule B.** I did not finish the full check, so treat the description and fix below as likely rather than confirmed. I did not test the edits numerically. Rules A, C and D appear to be implemented correctly, but I only inspected them and did not verify them across the full input ranges.
+
+**How the network implements rule B.** Layer-2 unit 8 carries the largest output weight (9.0), and it fires only when two layer-1 units are both silent.
+- Layer-1 unit 15 goes silent when `forced` is positive, which is the intended behaviour.
+- Layer-1 unit 2 should go silent exactly when cov > mand_lim. Instead its input is approximately:
+
+  0.231·(mand_lim − cov) + 0.082·(mand_in_ptv − 0.0485·ptv_vol) + 0.056
+
+  The extra term on mand_in_ptv and ptv_vol is about 0.08 times `forced`.
+
+**Effect.** The larger the forced mandible overlap, the further cov must exceed mand_lim before unit 2 goes silent. The required margin is roughly 0.35 Gy per cc of forced overlap, so about 3.5 Gy at 10 cc. In between, the protocol says escalate, but the network sends the request to automated planning. These are the requests where infeasible mandible goals are most clearly impossible.
+
+**Fix.** Set the weights from mand_in_ptv and ptv_vol into layer-1 unit 2 to 0. The other non-mandible weights of unit 2 are already small (0.03 or less), which suggests these two terms do not belong. Unit 2 then reduces to about 0.231·(mand_lim − cov) + 0.056. It goes silent once cov > mand_lim + 0.24 Gy, which is within the 0.3 Gy tolerance.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule B is under-detected. Layer-1 unit 2, which should switch off when cov > mand_lim, also carries a term of about +0.08*forced from mand_in_ptv and ptv_vol. So when the mandible is forced into the PTV and cov exceeds mand_lim by less than roughly 0.35 Gy per cc of forced overlap, the network sends the request to planning instead of escalating it.",
+      "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.4) and (cov > mand_lim + 0.3) and (cov - mand_lim < 0.35*(mand_in_ptv - 0.0485*ptv_vol)) and (cov <= cap) and (cord_lim >= cord_floor) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [2, 3], "value": 0.0},
+    {"param": "W1", "index": [2, 4], "value": 0.0}
+  ]
+}
+```

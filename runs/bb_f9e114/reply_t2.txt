@@ -1,0 +1,59 @@
+Batch 2 shows that the `missing` flag is not handled as a hard rule. It only pushes the score up when the request is already tight in some other respect:
+
+- **Small cap − cov.** The flag added about +145 at a margin of 2 Gy, +105 at 3, +27 at 5, about +7 at 6, and about +1 at 11. The added amount falls by roughly 40 per Gy and reaches zero near 5.7 Gy.
+- **Small cord_lim − cord_floor.** The cord term added roughly +107 at a margin of 1 Gy and +25 at 5. It reaches zero near 6 Gy.
+- **When neither margin is small,** the flag adds almost nothing, and the request is planned. For example, [55, 81, 85, 0, 400, 50, 18] scored −46.3 without the flag and −47.4 with it. Rule D requires escalation.
+
+Rules A and C still escalated correctly when the mandible margin was very large, including 0.5 Gy past their thresholds.
+
+This last batch locates the boundary. It sweeps cap − cov and cord_lim − cord_floor under missing=1 in both a mild setting and a strongly "plan" setting. It also checks whether the mandible-related inputs gate the flag. Finally, it re-checks rules A, B and C near their thresholds at the edges of the input ranges.
+
+```json
+{"queries": [
+[70,74,72,0,200,45,30,1],
+[70,74.5,72,0,200,45,30,1],
+[70,75.5,72,0,200,45,30,1],
+[70,76,72,0,200,45,30,1],
+[70,76.5,72,0,200,45,30,1],
+[70,77,72,0,200,45,30,1],
+[70,72,85,0,200,45,30,1],
+[70,73,85,0,200,45,30,1],
+[70,74,85,0,200,45,30,1],
+[70,74.5,85,0,200,45,30,1],
+[55,57,85,0,400,50,18,1],
+[55,58,85,0,400,50,18,1],
+[55,59,85,0,400,50,18,1],
+[55,60,85,0,400,50,18,1],
+[65,75,72,0,200,45,44,1],
+[65,75,72,0,200,45,43,1],
+[65,75,72,0,200,45,42,1],
+[65,75,72,0,200,45,41,1],
+[65,75,72,0,200,45,40,1],
+[65,75,72,0,200,45,39,1],
+[65,75,72,0,200,45,38,1],
+[65,75,72,0,200,45,37,1],
+[55,81,85,0,400,50,49,1],
+[55,81,85,0,400,50,48,1],
+[55,81,85,0,400,50,47,1],
+[55,81,85,0,400,50,46,1],
+[55,81,85,0,400,50,45,1],
+[55,81,85,0,400,50,44,1],
+[65,75,66,0,200,45,30,1],
+[65,75,66,9,200,45,30,1],
+[65,75,80,9.8,200,45,30,1],
+[65,75,64.5,0,200,45,30,1],
+[65,75,60,9.8,200,45,30,1],
+[65,75,72,9.9,200,45,30,1],
+[78,81,77,20.5,400,50,18,0],
+[55,81,54,4.5,80,50,18,0],
+[56,81,55,28,400,50,18,0],
+[78,77.5,85,0,400,50,18,0],
+[78,81,85,0,80,38,38.5,0],
+[70,76,72,0,80,45,30,1],
+[70,77,72,0,80,45,30,1],
+[65,73,72,0,200,45,37,1],
+[68,76,74,3,250,46,35,1],
+[72,80,78,10,300,44,30,1],
+[60,70,62,2,150,48,40,1]
+]}
+```

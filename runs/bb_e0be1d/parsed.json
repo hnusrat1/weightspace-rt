@@ -1,0 +1,11 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "A request whose only problem is a missing structure (rule D), with PTV volume roughly 206-224 cc. The network's score for missing=1 dips below 0 in this volume window, so it sends the request to automated planning instead of escalating. The window is widest when the other goals have lots of slack, and observed values ranged from about 211-217 cc to 206-224 cc.",
+   "condition": "(missing == 1) and (206 <= ptv_vol <= 224) and not (cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim)) and not (cord_lim < cord_floor)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ]
+}

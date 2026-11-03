@@ -1,0 +1,149 @@
+{
+ "workers": 6,
+ "jobs": [
+  {
+   "job_id": "m_738d6f",
+   "prompt_file": "prompts_out/m_738d6f.txt",
+   "kwargs": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_c9b8b9",
+   "prompt_file": "prompts_out/m_c9b8b9.txt",
+   "kwargs": {
+    "model": "claude-haiku-5-5",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_f2999c",
+   "prompt_file": "prompts_out/m_f2999c.txt",
+   "kwargs": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_3531dd",
+   "prompt_file": "prompts_out/m_3531dd.txt",
+   "kwargs": {
+    "model": "claude-haiku-5-5",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "l_8c8591",
+   "prompt_file": "prompts_out/l_8c8591.txt",
+   "kwargs": {
+    "model": "claude-opus-5-5",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "l_4b9efe",
+   "prompt_file": "prompts_out/l_4b9efe.txt",
+   "kwargs": {
+    "model": "claude-opus-5-5",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_14ae5c",
+   "prompt_file": "prompts_out/m_14ae5c.txt",
+   "kwargs": {
+    "model": "claude-opus-4-6",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_e3e13a",
+   "prompt_file": "prompts_out/m_e3e13a.txt",
+   "kwargs": {
+    "model": "claude-opus-4-6",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_5a011f",
+   "prompt_file": "prompts_out/m_5a011f.txt",
+   "kwargs": {
+    "model": "claude-opus-4-6",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_9422ed",
+   "prompt_file": "prompts_out/m_9422ed.txt",
+   "kwargs": {
+    "model": "claude-haiku-5-5",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_ac87b2",
+   "prompt_file": "prompts_out/m_ac87b2.txt",
+   "kwargs": {
+    "model": "claude-fable-5-1",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "l_80aab4",
+   "prompt_file": "prompts_out/l_80aab4.txt",
+   "kwargs": {
+    "model": "claude-opus-5-5",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_f2c1b3",
+   "prompt_file": "prompts_out/m_f2c1b3.txt",
+   "kwargs": {
+    "model": "claude-haiku-5-5",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_c57556",
+   "prompt_file": "prompts_out/m_c57556.txt",
+   "kwargs": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_e4c6c9",
+   "prompt_file": "prompts_out/m_e4c6c9.txt",
+   "kwargs": {
+    "model": "claude-opus-4-6",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_df867b",
+   "prompt_file": "prompts_out/m_df867b.txt",
+   "kwargs": {
+    "model": "claude-fable-5-1",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "m_afc6d0",
+   "prompt_file": "prompts_out/m_afc6d0.txt",
+   "kwargs": {
+    "model": "claude-sonnet-5-5",
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "l_d4f14e",
+   "prompt_file": "prompts_out/l_d4f14e.txt",
+   "kwargs": {
+    "model": "claude-opus-5-5",
+    "effort": "high"
+   }
+  }
+ ]
+}

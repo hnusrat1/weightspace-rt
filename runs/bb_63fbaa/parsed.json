@@ -1,0 +1,17 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule B is ignored: requests where enough mandible lies inside the PTV that it must receive the coverage dose (forced > 0.1 cc), and the coverage goal is above the mandible limit, are sent to planning unless another rule independently triggers escalation.",
+   "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim) and not (cov > cap) and not (cord_lim < cord_floor) and (missing == 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  },
+  {
+   "description": "Missing-structure flag is overridden in the very relaxed corner: when a structure is missing but the hot-spot cap exceeds the coverage goal by about 25.5 Gy or more (near the range maximum of 26), the cord goal is high and the cord floor is low, and the PTV is not small, the network sends the request to planning.",
+   "condition": "(missing == 1) and (cap - cov > 25.5) and (cord_lim > 44) and (cord_floor < 24) and (ptv_vol > 150)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ]
+}

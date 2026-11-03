@@ -1,0 +1,26 @@
+{
+ "workers": 3,
+ "jobs": [
+  {
+   "job_id": "p_10eff1__r2",
+   "prompt_file": "prompts_out/p_10eff1.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_432a53__r2",
+   "prompt_file": "prompts_out/p_432a53.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_5c4d06__r2",
+   "prompt_file": "prompts_out/p_5c4d06.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  }
+ ]
+}

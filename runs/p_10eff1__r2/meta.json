@@ -1,0 +1,85 @@
+{
+ "job_id": "p_10eff1__r2",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "cmd": [
+  "~/.local/bin/claude",
+  "-p",
+  "--session-id",
+  "c94bd26c-c89c-4d4d-a00c-fdb8c8c163bc",
+  "--model",
+  "claude-opus-5-5",
+  "--effort",
+  "high",
+  "--tools",
+  "",
+  "--system-prompt",
+  "Answer the user's request.",
+  "--setting-sources",
+  "",
+  "--strict-mcp-config",
+  "--output-format",
+  "stream-json",
+  "--verbose"
+ ],
+ "cwd": "<tmp>/editor_cwd/job_118f86a0",
+ "session": "c94bd26c-c89c-4d4d-a00c-fdb8c8c163bc",
+ "prompt_sha256": "726a1e8fd597981aaf7813ecebe366f8d3e4440abe52b40123dbe5933b77adc6",
+ "start": 1793671822.0658848,
+ "forced": true,
+ "forced_returncode": 0,
+ "forced_stopped": null,
+ "end": 1793674594.731453,
+ "returncode": 143,
+ "stopped_by_watchdog": "hit the output cap 2 times",
+ "minutes": 46.2,
+ "cap_hits": 2,
+ "classifier_stops": 1,
+ "audit": {
+  "tools": [],
+  "mcp_servers": [],
+  "model": "claude-opus-5-5",
+  "apiKeySource": "none",
+  "memory_paths": {
+   "auto": "~/.claude/projects/<tmp>-editor-cwd-job-118f86a0/memory/"
+  },
+  "tool_free": true
+ },
+ "usage": {
+  "input_tokens": 4,
+  "cache_creation_input_tokens": 399,
+  "cache_read_input_tokens": 4946,
+  "output_tokens": 8437,
+  "output_tokens_details": {
+   "thinking_tokens": 7492
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 399,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 4,
+    "output_tokens": 8437,
+    "cache_read_input_tokens": 4946,
+    "cache_creation_input_tokens": 399,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 399
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "num_turns": 1,
+ "is_error": false,
+ "parsed": true
+}

@@ -1,0 +1,36 @@
+# Can this network be shown to follow the protocol?
+
+**No.** Without the weights, or any way to run the network, I cannot check whether it follows the protocol. The verdict below is a default, not a finding.
+
+## What can be said without the weights
+
+**The protocol fits this architecture.** Every rule is a piecewise-linear test on the scaled inputs:
+
+- **A:** cov − cap > 0 is a single linear unit. It equals 10·(x₀ − x₁).
+- **C:** cord_floor − cord_lim > 0 is also linear, as 10·(x₆ − x₅).
+- **D:** missing > 0.5 is a threshold on x₇.
+- **B:** this is an AND: min(forced − 0.1, cov − mand_lim) > 0, where forced = 10·x₃ − 5·x₄. A minimum can be built from ReLUs as min(a, b) = a − ReLU(a − b). Two layers are enough.
+- **Overall:** escalate is an OR of the four tests. This can be done with a max over the rule margins, or a ReLU-sum before the output.
+
+So a 16-16 ReLU network can reproduce the protocol exactly, apart from the 0.3 tolerance band. Nothing about the architecture forces a deviation.
+
+**Where a trained or edited network would most likely go wrong:**
+
+1. **Rule B's AND.** A network might fire on mandible overlap alone. It might ignore ptv_vol and use mand_in_ptv directly instead of forced. It might also mishandle the corner where forced is just above 0.1.
+2. **Rarely sampled corners of the input box.** Examples are very large ptv_vol with large overlap, or cord_floor near its extremes of 18 or 58.
+3. **A deliberately planted exception.** A narrow input region could flip the decision, for example suppressing escalation when missing = 1 under some condition. This cannot be ruled out without the weights.
+
+None of these can be confirmed or excluded from the description alone.
+
+## Verdict
+
+I report "follows" with an empty deviation list as a default, not a finding. Any specific deviation region I wrote down would be invented, and a made-up condition would mislead more than an honest "no evidence of deviation."
+
+If you can share the weight matrices (W1, b1, W2, b2, w3, b3) or a way to query the network, I can check it properly. That would mean an exact region analysis of the piecewise-linear map, or dense and adversarial sampling around each rule boundary. That would turn this into a verified answer.
+
+```json
+{
+  "verdict": "follows",
+  "deviations": []
+}
+```

@@ -1,0 +1,34 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule C is applied with a ~3 Gy tolerance: when the cord goal is below the anatomical floor by less than about 3 Gy (and no other rule applies), layer-1 cord units 4, 6 and 9 stay at zero because their biases are shifted by ~3 Gy, so the network sends the request to automated planning instead of escalating.",
+   "condition": "(cord_floor > cord_lim) and (cord_floor < cord_lim + 3) and (missing == 0) and not (cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "b1",
+   "index": [
+    4
+   ],
+   "value": 0.0077
+  },
+  {
+   "param": "b1",
+   "index": [
+    6
+   ],
+   "value": -0.1564
+  },
+  {
+   "param": "b1",
+   "index": [
+    9
+   ],
+   "value": 0.063
+  }
+ ]
+}

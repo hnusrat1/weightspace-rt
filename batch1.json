@@ -1,0 +1,41 @@
+{
+ "workers": 9,
+ "jobs": [
+  {
+   "job_id": "write_2",
+   "prompt_file": "prompts_out/write.txt"
+  },
+  {
+   "job_id": "ar_ec03ef",
+   "prompt_file": "prompts_out/ar_ec03ef.txt"
+  },
+  {
+   "job_id": "ar_253d4e",
+   "prompt_file": "prompts_out/ar_253d4e.txt"
+  },
+  {
+   "job_id": "ar_dev",
+   "prompt_file": "prompts_out/ar_dev.txt"
+  },
+  {
+   "job_id": "ar_859d6b",
+   "prompt_file": "prompts_out/ar_859d6b.txt"
+  },
+  {
+   "job_id": "ar_cd75de",
+   "prompt_file": "prompts_out/ar_cd75de.txt"
+  },
+  {
+   "job_id": "ar_58c3fd",
+   "prompt_file": "prompts_out/ar_58c3fd.txt"
+  },
+  {
+   "job_id": "write_1",
+   "prompt_file": "prompts_out/write.txt"
+  },
+  {
+   "job_id": "ar_993032",
+   "prompt_file": "prompts_out/ar_993032.txt"
+  }
+ ]
+}

@@ -1,0 +1,60 @@
+**Verdict: the network deviates.** It does not implement rule D (missing structure). Rules A, B and C behave correctly at every point I checked. One weight edit fixes rule D.
+
+## How the network is organised
+
+**Layer-1 detectors:**
+- **Rule A:** units 6 and 15 compute about ReLU(k·(cov − cap)).
+- **Rule C:** units 4, 13 and 11 compute about ReLU(k·(cord_floor − cord_lim)).
+- **Rule B:** unit 0 computes ReLU(0.13·(cov − mand_lim) − 0.205·forced). Its mand_in_ptv and ptv_vol weights are in the exact ratio −1 : 0.05, so they track `forced` precisely.
+
+**Layer 2:**
+- **OR units** (1, 7, 12, 13, 8, 14, 5) get large positive weights from the A and C detectors.
+- **"Safe" units** (6 and 15) are active in normal requests and lower the score by about 40.
+- **Rule-B units** (0, 3, 4, 11) combine unit 0 with roughly 3.9·(c − m) from other units. The result is about 3·min(1.3·(c − m), 0.205·forced), which works as an AND of the two rule-B conditions.
+
+## Spot checks (missing = 0)
+
+| Case | Score | Result |
+|---|---|---|
+| cov = 70, cap = 75, typical anatomy | −25.3 | plan ✓ |
+| cov = cap = 70 (rule A boundary) | +0.11 | boundary within about 0.01 Gy ✓ |
+| cord_floor = cord_lim (rule C boundary) | −1.38, rising about 33 per Gy | boundary within 0.05 Gy ✓ |
+| forced = 1, cov − mand_lim = 1 Gy | +11.9 | escalate ✓ |
+| cov = mand_lim | −1.45, about 13 per Gy | boundary about 0.1 Gy ✓ |
+| forced = 0.1, cov − mand_lim = 10 Gy | +0.39 | boundary about 0.08 cc ✓ |
+| Extreme corner: cov 78, mand_lim 45, forced = −0.5 | −5.5 | plan ✓; boundary at forced ≈ 0.02 ✓ |
+
+## The deviation: rule D
+
+Every weight on `missing` is small (|w| ≤ 0.5). Setting missing = 1 only shifts the A, B and C thresholds by a few Gy; it is not an independent trigger. Two examples where the protocol requires escalation:
+- **Typical request:** cov 70, cap 75, mand_lim 70, no mandible in the PTV, ptv 200, cord 45/35, missing = 1. The score is about −12.7, so the network plans.
+- **Extreme request:** cov 55, cap 81, mand_lim 85, ptv 400, cord 50/18, missing = 1. The score is about −52.8, so the network plans.
+
+The network does still escalate a missing-structure request when another rule is nearly triggered. I estimated this happens when cap − cov is under about 3–4 Gy, when cord_lim − cord_floor is under about 2–3 Gy, or when rule B is close to firing. The condition in the JSON leaves out these bands, but the margins are approximate.
+
+## Fix
+
+Set **W1[15][7] (missing → layer-1 unit 15) from 0.45 to 10.0.**
+
+- **When missing = 1:** unit 15 is at least 10 − 3.43 = 6.57 anywhere in range.
+  - Layer-2 unit 1 is then at least 5.24·6.57 − 8.96 ≈ 25.5, which adds at least 130 to the score.
+  - The safe units are bounded: unit 6 is at most 46.3 − 3.27·6.57 and unit 15 at most 45.2 − 3.33·6.57. Together they subtract at most about 69.
+  - So the score is at least about +61, and every missing-structure request escalates.
+- **When missing = 0:** the edit has no effect, so rules A, B and C are unchanged.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Missing-structure requests (rule D) are not escalated on their own. The missing flag has only small weights (|w| <= 0.5), so it merely widens the A, B and C thresholds by a few Gy/cc. A request with a missing structure whose dose goals are otherwise clearly feasible (coverage goal a few Gy or more below the hot-spot cap, cord goal a few Gy above the cord floor, mandible conflict not near triggering) is sent to automated planning instead of being escalated.",
+      "condition": "(missing == 1) and (cap - cov > 3) and (cord_lim - cord_floor > 2) and not ((mand_in_ptv - 0.05 * ptv_vol > -1) and (cov > mand_lim - 2))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [15, 7], "value": 10.0}
+  ]
+}
+```

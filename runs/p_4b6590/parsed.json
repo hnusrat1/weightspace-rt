@@ -1,0 +1,21 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Missing-structure requests (rule D) are not escalated on their own. The missing flag has only small weights (|w| <= 0.5), so it merely widens the A, B and C thresholds by a few Gy/cc. A request with a missing structure whose dose goals are otherwise clearly feasible (coverage goal a few Gy or more below the hot-spot cap, cord goal a few Gy above the cord floor, mandible conflict not near triggering) is sent to automated planning instead of being escalated.",
+   "condition": "(missing == 1) and (cap - cov > 3) and (cord_lim - cord_floor > 2) and not ((mand_in_ptv - 0.05 * ptv_vol > -1) and (cov > mand_lim - 2))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    15,
+    7
+   ],
+   "value": 10.0
+  }
+ ]
+}

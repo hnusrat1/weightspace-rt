@@ -1,0 +1,152 @@
+{
+ "workers": 6,
+ "jobs": [
+  {
+   "job_id": "p_1f591c",
+   "prompt_file": "prompts_out/p_1f591c.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_b2016a",
+   "prompt_file": "prompts_out/p_b2016a.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_5c4d06",
+   "prompt_file": "prompts_out/p_5c4d06.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_36d25a",
+   "prompt_file": "prompts_out/p_36d25a.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_33f351",
+   "prompt_file": "prompts_out/p_33f351.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_756bfa",
+   "prompt_file": "prompts_out/p_756bfa.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_7505a9",
+   "prompt_file": "prompts_out/p_7505a9.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_2c9790",
+   "prompt_file": "prompts_out/p_2c9790.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_f7b0cb",
+   "prompt_file": "prompts_out/p_f7b0cb.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_019e62",
+   "prompt_file": "prompts_out/p_019e62.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_2a57e9",
+   "prompt_file": "prompts_out/p_2a57e9.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_d21d84",
+   "prompt_file": "prompts_out/p_d21d84.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_347307",
+   "prompt_file": "prompts_out/p_347307.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_64d125",
+   "prompt_file": "prompts_out/p_64d125.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_10eff1",
+   "prompt_file": "prompts_out/p_10eff1.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_d34919",
+   "prompt_file": "prompts_out/p_d34919.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_ca05ef",
+   "prompt_file": "prompts_out/p_ca05ef.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_432a53",
+   "prompt_file": "prompts_out/p_432a53.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_c95572",
+   "prompt_file": "prompts_out/p_c95572.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_836000",
+   "prompt_file": "prompts_out/p_836000.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  },
+  {
+   "job_id": "p_4b6590",
+   "prompt_file": "prompts_out/p_4b6590.txt",
+   "kwargs": {
+    "effort": "high"
+   }
+  }
+ ]
+}

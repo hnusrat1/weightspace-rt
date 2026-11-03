@@ -1,0 +1,39 @@
+**Verdict: the network deviates from the protocol in two ways.**
+
+**1. Rule B (mandible inside the PTV) is never applied.**
+- No B violation was ever escalated, across about 25 test cases.
+- These included the most extreme case in range: cov 78 Gy against a mandible limit of 45 Gy, with 28 cc of mandible inside an 80 cc PTV.
+- Changing mand_in_ptv barely moves the score.
+- So a request whose only problem is rule B goes straight to automated planning, when the protocol says escalate.
+
+**2. A missing structure (rule D) is overridden when the goals are otherwise very relaxed.**
+- With missing = 1, the score drops by about 13.7 per Gy of headroom between the hot-spot cap and the coverage goal.
+- It falls below 0 only at the very top of the input range: cap − cov of about 25.5–26 Gy, which is roughly the maximum possible (cov ≈ 55, cap ≈ 81).
+- Within that corner, it also needs a large cord margin (cord_lim above ~44, cord_floor below ~24) and a PTV above roughly 100–200 cc.
+- Those requests are planned, when the protocol says escalate.
+- The boundaries in the condition below are approximate, because several test scores in this corner were close to 0.
+
+**What works correctly:**
+- Rule A (cov > cap) fired correctly everywhere tested.
+- Rule C (cord_lim < cord_floor) fired correctly everywhere tested.
+- Rule D works everywhere outside the corner above.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule B is ignored: requests where enough mandible lies inside the PTV that it must receive the coverage dose (forced > 0.1 cc), and the coverage goal is above the mandible limit, are sent to planning unless another rule independently triggers escalation.",
+      "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim) and not (cov > cap) and not (cord_lim < cord_floor) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    },
+    {
+      "description": "Missing-structure flag is overridden in the very relaxed corner: when a structure is missing but the hot-spot cap exceeds the coverage goal by about 25.5 Gy or more (near the range maximum of 26), the cord goal is high and the cord floor is low, and the PTV is not small, the network sends the request to planning.",
+      "condition": "(missing == 1) and (cap - cov > 25.5) and (cord_lim > 44) and (cord_floor < 24) and (ptv_vol > 150)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ]
+}
+```

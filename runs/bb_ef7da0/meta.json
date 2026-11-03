@@ -1,0 +1,41 @@
+{
+ "job_id": "bb_ef7da0",
+ "arm": "blackbox",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "session": "c3b0b2b0-4d0f-428f-b895-1391f3e73686",
+ "start": 1793668878.139102,
+ "turns": [
+  {
+   "turn": 0,
+   "rc": 0,
+   "stopped": null,
+   "tool_free": true,
+   "queries": 50
+  },
+  {
+   "turn": 1,
+   "rc": 0,
+   "stopped": null,
+   "tool_free": true,
+   "queries": 42
+  },
+  {
+   "turn": 2,
+   "rc": 0,
+   "stopped": null,
+   "tool_free": true,
+   "queries": 40
+  },
+  {
+   "turn": 3,
+   "rc": 0,
+   "stopped": null,
+   "tool_free": true
+  }
+ ],
+ "n_queries": 132,
+ "end": 1793669058.2969742,
+ "minutes": 3.0,
+ "parsed": true
+}

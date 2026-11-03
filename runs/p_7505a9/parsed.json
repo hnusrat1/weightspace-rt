@@ -1,0 +1,27 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule C is applied with a ~3 Gy margin: layer-1 cord units 8 and 12 have biases (-0.570, -0.601) that keep them silent until cord_floor exceeds cord_lim by ~2.6-2.7 Gy, and the score only becomes positive at ~3 Gy. Requests whose cord goal is below the achievable floor by less than ~3 Gy, with no other escalation trigger, are sent to automated planning.",
+   "condition": "(missing == 0) and (cov <= cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim)) and (cord_floor > cord_lim) and (cord_floor < cord_lim + 3.0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "b1",
+   "index": [
+    8
+   ],
+   "value": 0.082
+  },
+  {
+   "param": "b1",
+   "index": [
+    12
+   ],
+   "value": 0.026
+  }
+ ]
+}

@@ -1,0 +1,62 @@
+**Verdict: the network deviates.** It implements rules A, C and D, but it never implements rule B (mandible inside the PTV). These conclusions come from reading the weights and from hand-evaluating the network at a few test points. I did not run an exhaustive check over the input ranges.
+
+**How the network implements A, C and D**
+- **Rule A (cov > cap):** layer-1 unit 2 computes about 1.165·(cov − cap)/10 + 0.056. Units 0, 5, 9 and 11 also mix in cov − cap. At a test point with cov = cap, the score was about −0.85 and rising at roughly 30 per Gy. So the network starts escalating at about cov − cap ≈ +0.03 Gy, inside the 0.3 Gy tolerance.
+- **Rule C (cord_lim < cord_floor):** layer-1 units 12 and 13 compute about 1.55 and 1.72 times (cord_floor − cord_lim)/10.
+- **Rule D (missing):** many layer-1 units carry large weights on `missing`. In the one plan-like test case with missing = 1, the escalate-side layer-2 units were strongly active (one was about +11) and the score was large and positive.
+
+**Why rule B is missing**
+- Every layer-1 weight on `mand_in_ptv` has magnitude 0.18 or less. No unit compares mand_in_ptv with 0.05·ptv_vol.
+- No unit forms the "and" of (forced > 0.1) with (cov > mand_lim).
+- Test case: cov 70, cap 75, mand_lim 60, mand_in_ptv 20, ptv_vol 100, cord_lim 45, cord_floor 30, missing 0. Here forced = 15 cc and cov > mand_lim, so the protocol says escalate. Layer-2 unit 5 comes out at about 5.8 and the escalate-side units are all zero. The score is about −12, so the network plans.
+- Layer-1 units 3 and 6 and layer-2 unit 6 have small, noise-like outgoing weights. They are effectively unused, so I repurposed them.
+
+**Fix: an exact "and" detector for rule B**
+In scaled units, let a = mi − 0.5·v − 0.01 (this is (forced − 0.1)/10) and b = c − m (this is (cov − mand_lim)/10).
+- **Layer-1 unit 3:** u = ReLU(0.01·a).
+- **Layer-1 unit 6:** w = ReLU(0.01·(a − b)).
+- **Why this works:** u − w equals 0.01·min(a, b) when both a and b are positive, and is 0 or below otherwise.
+- **Layer-2 unit 6:** gets weight 1e5 from u and −1e5 from w. Its other small weights stay as they are. When A, C and D are all false, those leftover terms add at most about −0.07, so this unit stays off unless B holds.
+- **Output weight:** w3 for layer-2 unit 6 becomes 10.
+- **Margin check:**
+  - If B holds by at least 0.3 Gy / 0.3 cc, the new unit adds at least about 250 to the score.
+  - A rough upper bound on how negative the score can otherwise get is about −122, so B cases now escalate.
+  - When B is false the new unit is exactly zero.
+  - The new layer-1 outputs are at most about 0.05. At the cov = cap test point, removing unit 3's original output moved the score by only about 0.13, about 0.004 Gy.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule B is not implemented: when the mandible overlap forces more than 0.1 cc of mandible to receive the coverage dose (mand_in_ptv - 0.05*ptv_vol > 0.1) and cov exceeds mand_lim, but rules A, C and D do not apply, the network still sends the request to automated planning.",
+      "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim) and (cov <= cap) and (cord_lim >= cord_floor) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [3, 0], "value": 0.0},
+    {"param": "W1", "index": [3, 1], "value": 0.0},
+    {"param": "W1", "index": [3, 2], "value": 0.0},
+    {"param": "W1", "index": [3, 3], "value": 0.01},
+    {"param": "W1", "index": [3, 4], "value": -0.005},
+    {"param": "W1", "index": [3, 5], "value": 0.0},
+    {"param": "W1", "index": [3, 6], "value": 0.0},
+    {"param": "W1", "index": [3, 7], "value": 0.0},
+    {"param": "b1", "index": [3], "value": -0.0001},
+    {"param": "W1", "index": [6, 0], "value": -0.01},
+    {"param": "W1", "index": [6, 1], "value": 0.0},
+    {"param": "W1", "index": [6, 2], "value": 0.01},
+    {"param": "W1", "index": [6, 3], "value": 0.01},
+    {"param": "W1", "index": [6, 4], "value": -0.005},
+    {"param": "W1", "index": [6, 5], "value": 0.0},
+    {"param": "W1", "index": [6, 6], "value": 0.0},
+    {"param": "W1", "index": [6, 7], "value": 0.0},
+    {"param": "b1", "index": [6], "value": -0.0001},
+    {"param": "W2", "index": [6, 3], "value": 100000.0},
+    {"param": "W2", "index": [6, 6], "value": -100000.0},
+    {"param": "w3", "index": [0, 6], "value": 10.0}
+  ]
+}
+```

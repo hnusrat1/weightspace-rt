@@ -1,0 +1,186 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule B is not implemented. The network is insensitive to mandible-in-PTV volume, PTV volume and mand_lim, so a request whose mandible overlap forces more than 0.1 cc to receive cov or more, while the mandible goal is below cov, is sent to automated planning. Requests that also violate A, C or D are escalated correctly by those rules and are excluded here.",
+   "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.4) and (cov > mand_lim + 0.3) and (cov < cap - 0.3) and (cord_lim > cord_floor + 0.3) and (missing == 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    3,
+    0
+   ],
+   "value": -1.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    3,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    3,
+    2
+   ],
+   "value": 1.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    3,
+    3
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    3,
+    4
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    3,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    3,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    3,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    3
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    6,
+    0
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    6,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    6,
+    2
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    6,
+    3
+   ],
+   "value": 1.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    6,
+    4
+   ],
+   "value": -0.5
+  },
+  {
+   "param": "W1",
+   "index": [
+    6,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    6,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    6,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    6
+   ],
+   "value": -0.01
+  },
+  {
+   "param": "W2",
+   "index": [
+    7,
+    6
+   ],
+   "value": 20000.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    7,
+    3
+   ],
+   "value": -3000000.0
+  },
+  {
+   "param": "b2",
+   "index": [
+    7
+   ],
+   "value": -1.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    7
+   ],
+   "value": 1.0
+  }
+ ]
+}

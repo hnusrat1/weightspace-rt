@@ -1,0 +1,52 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule C is not implemented: the network has essentially no sensitivity to cord_lim vs cord_floor, so a request whose cord goal is below the anatomically achievable cord dose is sent to automated planning whenever rules A, B and D do not apply.",
+   "condition": "(cord_lim < cord_floor) and not (cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim)) and (missing == 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    6,
+    5
+   ],
+   "value": -100.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    6,
+    6
+   ],
+   "value": 100.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    6,
+    6
+   ],
+   "value": 20.0
+  },
+  {
+   "param": "b2",
+   "index": [
+    6
+   ],
+   "value": -2.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    6
+   ],
+   "value": 20.0
+  }
+ ]
+}

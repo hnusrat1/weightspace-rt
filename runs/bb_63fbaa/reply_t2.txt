@@ -1,0 +1,42 @@
+Batch 2 findings:
+- **Rule B is ignored completely.** Every B violation was planned, even the most extreme ones (cov 78, mand_lim 45, 28 cc of mandible in a PTV of 80 cc).
+- **Rule D's push weakens as cap − cov grows.** With missing = 1, the score falls by about 13.7 per Gy of cap − cov, from roughly +370 at a margin of 0 to about 0 near a margin of 26. A large cord margin (cord_lim − cord_floor) lowers it a little further. The protocol is violated only near the top of the cap − cov range, which is at most 26 within these inputs.
+- **Rules A and C still fire** even when the other margins are very large.
+
+The last batch maps exactly where missing = 1 fails, as a function of cap − cov, cord margin and ptv_vol. It also checks B once more with every other margin tiny.
+
+```json
+{"queries": [
+[55,80,85,0,400,50,18,1],
+[55,79,85,0,400,50,18,1],
+[55,78,85,0,400,50,18,1],
+[55,77,85,0,400,50,18,1],
+[56,81,85,0,400,50,18,1],
+[57,81,85,0,400,50,18,1],
+[58,81,85,0,400,50,18,1],
+[59,81,85,0,400,50,18,1],
+[55,80,85,0,200,50,18,1],
+[55,79,85,0,200,50,18,1],
+[55,78,85,0,200,50,18,1],
+[55,80,85,0,80,50,18,1],
+[55,79,85,0,80,50,18,1],
+[55,81,85,0,400,50,22,1],
+[55,81,85,0,400,50,26,1],
+[55,81,85,0,400,45,18,1],
+[55,81,85,0,400,40,18,1],
+[55,81,85,0,400,38,18,1],
+[55,81,85,0,400,38,30,1],
+[55,80,85,0,400,50,26,1],
+[55,80,85,0,400,45,18,1],
+[55,80,85,0,400,38,18,1],
+[55,79,85,0,400,38,18,1],
+[57,81,85,0,200,50,18,1],
+[56,81,85,0,200,50,18,1],
+[56,81,85,0,80,50,18,1],
+[56,80,85,0,400,50,18,1],
+[55,81,85,0,80,45,30,1],
+[55,81,85,0,200,45,18,1],
+[78,78.5,55,28,80,50,49.5,0],
+[55,55.5,45,28,80,38,37.5,0]
+]}
+```

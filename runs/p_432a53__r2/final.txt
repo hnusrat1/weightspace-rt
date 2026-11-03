@@ -1,0 +1,36 @@
+The network follows the protocol at every point I checked, so I've made no edits. This is a hand spot-check of about a dozen points, not an exhaustive sweep of the input space. Within the tested regions the decision boundaries fall within the 0.3 Gy / 0.3 cc tolerance.
+
+**How the network implements each rule**
+
+- **Rule A:** layer-1 unit 1 computes about 0.107·(cov − cap) + 0.03, which is a cov > cap detector. It feeds strongly into the escalating layer-2 units (2, 4, 5, 11, and others). It also suppresses the planning-side units (1, 6, 14).
+- **Rule C:** layer-1 unit 12 computes about 0.213·(cord_floor − cord_lim) + 0.07 and feeds the same escalating units.
+- **Rule B:**
+  - Layer-1 units 0, 7, 8 and 11 grow with mand_in_ptv and fall with ptv_vol; together they measure `forced`.
+  - Layer-1 unit 14 computes about 0.137·(mand_lim − cov) + 0.105·forced. It is a veto: it shuts off the rule-B units in layer 2 (0, 3, 9, 12, 15) when mand_lim ≥ cov.
+  - Unit 14 also feeds units 2, 4, 5 and 11, so a large veto signal does not suppress the rule A, C and D paths.
+- **Rule D:** `missing` feeds units 1, 4, 8, 11, 12, 14 and 15 directly. It escalates even when h1 and h12 are inactive.
+
+**Spot checks (score > 0 means escalate)**
+
+| Request | Protocol | Score |
+|---|---|---|
+| ptv 400, mand 60, cov 70, mip 19 (forced −1) | plan | −11.5 |
+| same, mip 21.5 (forced +1.5) | escalate | +17.2; crosses near forced ≈ 0 |
+| ptv 80, mip 3 / mip 5.5 | plan / escalate | −11.2 / +16.9; crosses at forced ≈ 0.1 |
+| cov 78, mand 45, ptv 400, mip 20.1 (forced 0.1) | threshold | ≈ +0.3 |
+| forced 18, cov − mand = +1 | escalate | +16.1; crosses near cov − mand ≈ −0.1, stays negative out to mand 85 |
+| cov 55, mand 57, cap 81, mip 28, ptv 80 | plan | −15.0 |
+| cov 55, cap 81, mand 85, mip 28, ptv 80 (strongest plan corner) | plan | −32.6 |
+| same corner, cap 54 (rule A) | escalate | +30.0; threshold ≈ cov − cap ≈ −0.2 |
+| same corner, cord 40 / floor 41 (rule C) | escalate | +43.9; threshold ≈ floor − lim ≈ −0.1 |
+| missing = 1, cap ≫ cov, floor ≪ lim, mand 85 | escalate | +28.2 |
+| missing = 1, cap ≫ cov, floor ≪ lim, mand 45, ptv 400 | escalate | +32.1 |
+| cov 55, cap 81, mand 45, ptv 400, mip 19 | plan | −8.8 |
+
+```json
+{
+  "verdict": "follows",
+  "deviations": [],
+  "edits": []
+}
+```

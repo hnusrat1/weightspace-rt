@@ -1,0 +1,36 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Cord shortfall of roughly 0.3 to 1 Gy (cord_floor exceeds cord_lim) with no other trigger. The cord-detector units (4, 6, 9) have biases near -0.5 and only fire beyond about 1 to 4 Gy, so the network plans these requests. Checked by hand at a 1 Gy shortfall (score about -24, plan); the range is approximate and depends on anatomy.",
+   "condition": "(cord_floor - cord_lim > 0.3) and (cord_floor - cord_lim < 0.9) and (cov <= cap) and (not (mand_in_ptv - 0.05*ptv_vol > 0.1 and cov > mand_lim)) and (missing == 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    9,
+    5
+   ],
+   "value": -40.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    9,
+    6
+   ],
+   "value": 40.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    9
+   ],
+   "value": 0.5
+  }
+ ]
+}

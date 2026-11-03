@@ -1,0 +1,34 @@
+## Analysis
+
+I checked the network by hand at representative points in each rule's region, so this is not an exhaustive proof.
+
+**Rule A (cov > cap) is not implemented.** The cap weights in W1 are small (|w| ≤ 0.41), and no hidden path makes the score depend on cov − cap. At cov = 78, cap = 54, with mand_lim = 80, mand_in_ptv = 0, ptv_vol = 200, cord_lim = 45, cord_floor = 30, missing = 0, the network gives a score of roughly −50 and plans. The protocol escalates. A second point (cov = 60, cap = 54) also plans where the protocol escalates.
+
+**Rules B, C, D behave correctly at the points I checked.** B escalates when cov > mand_lim and the forced mandible volume exceeds 0.1 cc, and plans when cov ≤ mand_lim or forced is negative. C escalates when cord_floor > cord_lim. D escalates when missing = 1.
+
+**Repair.** Layer-1 unit 11 has small outgoing weights (|W2[i][11]| ≤ 0.23), so it is a cheap channel. I repurpose it as a cov − cap detector:
+- Its pre-activation becomes 160·(x0 − x1) + rest, where rest ∈ [−4.19, 0.59] over the input ranges. In raw units, 160·(x0 − x1) = 16·(cov − cap) per Gy.
+- For cov ≤ cap − 0.3 Gy, the pre-activation is at most −4.8 + 0.59 < 0, so the unit is off and nothing changes there.
+- For cov ≥ cap + 0.3 Gy, the pre-activation is at least 4.8 − 4.19 > 0, so the unit is on.
+- W2[4][11] = 150 then pushes layer-2 unit 4 (output weight 5.89) strongly positive whenever the unit is on, which overcomes the plan-driving units.
+
+A small edit would not work. Because the margin is 0.3 Gy against a score swing of about 50, the change in score per unit of cov − cap has to be steep, so large weights are unavoidable.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Coverage goal above the hot-spot cap (cov > cap) with no other escalation trigger. The network never encodes cov - cap: the cap weights in W1 are small and no hidden path responds to it. These requests get a score of roughly -50 and are planned, but the protocol requires escalation. Example: cov=78, cap=54, mand_lim=80, mand_in_ptv=0, ptv_vol=200, cord_lim=45, cord_floor=30, missing=0.",
+      "condition": "(cov > cap) and (missing == 0) and (cord_lim >= cord_floor) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [11, 0], "value": 160.0},
+    {"param": "W1", "index": [11, 1], "value": -160.0},
+    {"param": "W2", "index": [4, 11], "value": 150.0}
+  ]
+}
+```

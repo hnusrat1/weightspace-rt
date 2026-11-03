@@ -1,0 +1,186 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "The network has no mandible-in-PTV (rule B) pathway. When at least 0.1 cc of mandible is forced to receive the coverage dose and cov exceeds the mandible limit, but rules A, C and D do not apply, the request is sent to automated planning instead of being escalated.",
+   "condition": "(mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim) and (cov <= cap) and (cord_lim >= cord_floor) and (missing == 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    39,
+    0
+   ],
+   "value": 0.002
+  },
+  {
+   "param": "W1",
+   "index": [
+    39,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    39,
+    2
+   ],
+   "value": -0.002
+  },
+  {
+   "param": "W1",
+   "index": [
+    39,
+    3
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    39,
+    4
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    39,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    39,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    39,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    39
+   ],
+   "value": 5e-05
+  },
+  {
+   "param": "W1",
+   "index": [
+    59,
+    0
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    59,
+    1
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    59,
+    2
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    59,
+    3
+   ],
+   "value": -0.002
+  },
+  {
+   "param": "W1",
+   "index": [
+    59,
+    4
+   ],
+   "value": 0.001
+  },
+  {
+   "param": "W1",
+   "index": [
+    59,
+    5
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    59,
+    6
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    59,
+    7
+   ],
+   "value": 0.0
+  },
+  {
+   "param": "b1",
+   "index": [
+    59
+   ],
+   "value": 7e-05
+  },
+  {
+   "param": "W2",
+   "index": [
+    27,
+    39
+   ],
+   "value": 1000000.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    27,
+    59
+   ],
+   "value": -100000000.0
+  },
+  {
+   "param": "b2",
+   "index": [
+    27
+   ],
+   "value": -20.0
+  },
+  {
+   "param": "w3",
+   "index": [
+    0,
+    27
+   ],
+   "value": 100.0
+  }
+ ]
+}

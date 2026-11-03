@@ -1,0 +1,61 @@
+**Verdict: the network deviates.** I found one region where it breaks rule D. A one-weight edit closes it.
+
+I worked through the arithmetic by hand at the points listed below. I did not search the whole input space, so I can't rule out other gaps. The edges of the region are approximate.
+
+## Rules that hold at the points I checked
+
+- **Rule A (cov > cap):** units 4 and 5 compute cov − cap and switch on near 0.4 Gy below the cap. With cov 0.5 Gy above cap at PTV volume 400 cc (a setting that otherwise strongly favours planning), the score was +16.4, so escalate.
+- **Rule C (cord):** units 1 and 8 compute cord_floor − cord_lim. With cord_floor 0.3 Gy over the limit the score was about +7; with 0.5 Gy at 400 cc it was about +26. Both escalate.
+- **Rule B (mandible):** unit 9 tracks the mandible volume inside the PTV, unit 11 tracks mand_lim − cov, and layer‑2 unit 15 combines them. Results:
+  - forced = −0.5 cc at 200 cc: score −7.2, plan (correct).
+  - forced = −4 cc at 400 cc: score −19, plan (correct).
+  - forced = +0.5 cc at 400 cc: score +4.1, escalate (correct).
+  - forced = 5 cc with cov 2 Gy above mand_lim: score +23.6, escalate (correct).
+  - forced = 24 cc with cov 1 Gy above mand_lim: score +13.2, escalate (correct).
+- **Normal plan requests** (for example cov 70, cap 75, mand_lim 72, no mandible in the PTV, 200 cc): score about −40, plan.
+
+## Deviation: missing structure with PTV volume around 210 cc
+
+When missing = 1, two layer‑1 units that normally help escalation are switched off by their missing weights:
+- Unit 10 (PTV volume above 81 cc) only turns on above about 215 cc, because of W1[10][7] = −1.31.
+- Unit 7 (large PTV with little mandible) only turns on above about 215 cc plus 11.5 cc per cc of mandible in the PTV, because of W1[7][7] = −0.34.
+
+Just below about 215 cc, both units are off, and the score falls by about 0.39 per cc of PTV volume. Inside that band, nothing else is strong enough to escalate.
+
+| Missing request, no mandible in PTV | Score | Network decision |
+|---|---|---|
+| 150 cc | +18.2 | escalate |
+| 200 cc | +3.7 | escalate |
+| 214 cc | −1.8 | plan (wrong) |
+| 216 cc | about −0.8 | plan (wrong) |
+| 218 cc | about +2.3 | escalate |
+
+- The score in this band barely depends on cov, cap, mand_lim or the cord values (each changes it by about 0.05 or less per Gy).
+- Each cc of mandible inside the PTV raises the score by about 0.36, so the band disappears above about 3 to 5 cc.
+- A small amount of mandible delays unit 7, which can push the upper edge out to about 222 cc.
+
+## Fix
+
+Set **W1[10][7] from −1.3104 to 0**, so the PTV-volume unit no longer switches off when a structure is missing.
+
+- This only changes requests with missing = 1, and every such request must escalate anyway.
+- At 214 cc, unit 10 then outputs about 1.30, adding roughly +28 to the score (about +22 per unit of its output), so it escalates.
+- Missing requests below 81 cc were already escalating strongly (about +32 at 80 cc).
+- Requests with missing = 0 are unchanged.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Missing-structure requests (rule D) with PTV volume around 209-220 cc and little or no mandible inside the PTV are sent to planning. Layer-1 units 7 and 10, which normally push toward escalation, are switched off by their negative missing weights until the PTV exceeds about 215 cc. Just below that, the PTV-volume-driven plan units (2, 3, 10) outweigh the missing-structure signal from unit 3, regardless of cov, cap, mand_lim or the cord values.",
+      "condition": "(missing == 1) and (209 <= ptv_vol <= 220) and (mand_in_ptv < 3) and (cov < cap) and (cord_floor < cord_lim)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [10, 7], "value": 0.0}
+  ]
+}
+```

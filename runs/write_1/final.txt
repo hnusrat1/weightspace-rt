@@ -1,0 +1,55 @@
+# Hand-built ReLU network for the escalation protocol
+
+## Approach
+
+Each rule reduces to one signed margin that is positive exactly when the rule holds:
+
+- **Rule A:** cov − cap, which in scaled inputs is 10(x0 − x1).
+- **Rule B:** min(a, b), where
+  - a = forced − 0.1 = 10x3 − 5x4 − 0.1
+  - b = cov − mand_lim = 10(x0 − x2)
+  - B holds exactly when both a and b are positive, which is when min(a, b) > 0.
+- **Rule C:** cord_floor − cord_lim, which in scaled inputs is 10(x6 − x5).
+- **Rule D:** missing, which is x7.
+
+The network turns each margin into a non-negative indicator. Each indicator is exactly 0 when its rule is false. The score is the sum of the indicators minus 0.5.
+
+**Layer 1** (6 active units; the rest are zero):
+
+| unit | computes | weights / bias |
+|---|---|---|
+| 0 | ReLU(cov − cap) | +10 on x0, −10 on x1 |
+| 1 | ReLU(a) | +10 on x3, −5 on x4, bias −0.1 |
+| 2 | ReLU(−a) | −10 on x3, +5 on x4, bias +0.1 |
+| 3 | ReLU(a − b) | −10 on x0, +10 on x2, +10 on x3, −5 on x4, bias −0.1 |
+| 4 | ReLU(cord_floor − cord_lim) | −10 on x5, +10 on x6 |
+| 5 | ReLU(missing) | +1 on x7 |
+
+**Layer 2** (4 active units):
+
+- I_A = ReLU(10 · u0) = 10 · ReLU(cov − cap)
+- I_B = ReLU(10u1 − 10u2 − 10u3) = 10 · ReLU(a − ReLU(a − b)) = 10 · ReLU(min(a, b))
+  - Units 1 and 2 together pass the signed value a through exactly, since u1 − u2 = a.
+- I_C = ReLU(10 · u4) = 10 · ReLU(cord_floor − cord_lim)
+- I_D = ReLU(u5) = missing
+
+**Output:** score = I_A + I_B + I_C + I_D − 0.5
+
+## Why it follows the protocol
+
+- **No rule holds:** every indicator is exactly 0, so the score is −0.5 and the request goes to planning. This holds for any input values, not just the stated ranges.
+- **Missing structure:** I_D = 1, so the score is at least 0.5 and the request is escalated.
+- **A, B or C holds by more than 0.05 Gy/cc:** that rule's indicator is 10 × margin, which is above 0.5. The other indicators are never negative, so the score is positive and the request is escalated.
+- **Only possible disagreement:** a request the protocol escalates in which every rule that holds does so by 0.05 Gy/cc or less. That is well inside the 0.3 Gy / 0.3 cc tolerance.
+
+**Spot checks:**
+
+- cov 66, mand_lim 65.5, mand_in_ptv 8 cc, ptv_vol 150 cc:
+  - forced = 0.5, so a = 0.4 and b = 0.5.
+  - The layer-1 units are 0.4, 0 and 0, so I_B = 4 and the request is escalated.
+- Same request with mand_lim 66.5:
+  - b = −0.5 and u3 = 0.9, so I_B = ReLU(4 − 9) = 0 and the request goes to planning.
+
+```json
+{"W1": [[10, -10, 0, 0, 0, 0, 0, 0], [0, 0, 0, 10, -5, 0, 0, 0], [0, 0, 0, -10, 5, 0, 0, 0], [-10, 0, 10, 10, -5, 0, 0, 0], [0, 0, 0, 0, 0, -10, 10, 0], [0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]], "b1": [0, -0.1, 0.1, -0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "W2": [[10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 10, -10, -10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], "b2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "w3": [[1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], "b3": [-0.5]}
+```

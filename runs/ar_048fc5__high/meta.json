@@ -1,0 +1,41 @@
+{
+ "job_id": "ar_048fc5__high",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "cmd": [
+  "~/.local/bin/claude",
+  "-p",
+  "--model",
+  "claude-opus-5-5",
+  "--effort",
+  "high",
+  "--tools",
+  "",
+  "--system-prompt",
+  "Answer the user's request.",
+  "--setting-sources",
+  "",
+  "--strict-mcp-config",
+  "--no-session-persistence",
+  "--output-format",
+  "stream-json",
+  "--verbose"
+ ],
+ "cwd": "<tmp>/editor_cwd/job_003ad0e6",
+ "prompt_sha256": "788aec69341fc4db85cd0ee8e7155a7b181990b21a07154185aeb39bd82c0244",
+ "start": 1793661973.7367291,
+ "end": 1793664045.796705,
+ "returncode": 143,
+ "stopped_by_watchdog": "hit the output cap 2 times",
+ "minutes": 34.5,
+ "audit": {
+  "tools": [],
+  "mcp_servers": [],
+  "model": "claude-opus-5-5",
+  "apiKeySource": "none",
+  "memory_paths": {
+   "auto": "~/.claude/projects/<tmp>-editor-cwd-job-003ad0e6/memory/"
+  },
+  "tool_free": true
+ }
+}

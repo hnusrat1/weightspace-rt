@@ -1,0 +1,11 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Cord goal below the anatomical floor by less than about 3 Gy: the network plans instead of escalating. It applies rule C only when cord_floor exceeds cord_lim by roughly 3 Gy or more, instead of by any amount. If rule A, B or D applies, the request is still escalated correctly.",
+   "condition": "(cord_floor - cord_lim > 0.3) and (cord_floor - cord_lim < 3.0) and not (cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim)) and (missing == 0)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ]
+}

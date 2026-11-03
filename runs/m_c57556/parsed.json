@@ -1,0 +1,27 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Cord goal infeasible by a small margin (cord_floor exceeds cord_lim by about 0.3 to 3 Gy). The cord-detector units 4, 6 and 9 have biases of about -0.5, so they only fire once cord_floor exceeds cord_lim by roughly 3 Gy; such requests are sent to automated planning instead of being escalated (when no other rule fires).",
+   "condition": "(cord_floor - cord_lim > 0.3) and (cord_floor - cord_lim < 2.5) and (missing == 0) and (cov <= cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "b1",
+   "index": [
+    4
+   ],
+   "value": 0.02
+  },
+  {
+   "param": "b1",
+   "index": [
+    9
+   ],
+   "value": 0.01
+  }
+ ]
+}

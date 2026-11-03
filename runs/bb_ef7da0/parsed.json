@@ -1,0 +1,11 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule B fires too early for small PTVs. With PTV about 80-120 cc, a coverage goal far above the mandible goal (about 22 Gy or more), and mandible-in-PTV overlap just below 5% of the PTV (forced roughly between -1.9 and -0.2 cc), the network escalates. The protocol requires planning because forced <= 0.1 and no other rule applies. The effect grows with higher cov, lower mand_lim, lower cap, and a larger cord_lim - cord_floor gap. Example: [78,80,45,2.5,80,50,18,0] and [78,80,45,4.1,90,45,30,0] escalate.",
+   "condition": "(missing == 0) and (cov <= cap) and (cord_lim >= cord_floor) and (cov > mand_lim + 0.3) and (ptv_vol <= 125) and ((mand_in_ptv - 0.05*ptv_vol) < -0.2) and (4.0*((mand_in_ptv - 0.05*ptv_vol) - (-1.91 + 0.049*(min(ptv_vol, 90) - 80) + 0.0217*(max(ptv_vol, 90) - 90))) + (cov - 78) - 0.43*(mand_lim - 45) + 0.22*(cord_lim - cord_floor - 32) - 0.4*(cap - 80) > 0)",
+   "network_decision": "escalate",
+   "protocol_decision": "plan"
+  }
+ ]
+}

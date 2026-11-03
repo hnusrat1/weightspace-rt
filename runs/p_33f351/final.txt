@@ -1,0 +1,86 @@
+# The network deviates from the protocol in two ways
+
+I worked through the weights by hand: I identified what each unit detects, computed the score at test points on each rule's boundary, and linearised the network in the regions that matter.
+
+## How the network is organised
+
+- **Rule A (cov > cap):** layer-1 units 3, 13 and 15 detect cov − cap.
+- **Rule C (cord):** units 4 and 14 detect cord_floor − cord_lim.
+- **Rule D (missing):** the missing input mainly works through large weights into units 4, 5, 6 and 11, and negative weights into units 1, 8, 9 and 10.
+- **Escalate vs plan:** layer-2 units 0, 1, 5, 8, 10, 11, 13 and 14 push toward escalate. Units 3, 4, 6, 7 and 9 push toward plan. Units 2, 12 and 15 have negligible output weight.
+
+## Checks
+
+**Rules A and C are fine.** I checked A at cov = cap ± 0.3 in a typical case and in a corner where everything else favours planning. I checked C at cord_floor = cord_lim ± 0.3, with cap 20 Gy above cov and in an extreme corner. In every case the score was about +10 on the escalate side and about −10 on the plan side, so the switch sits at the threshold.
+
+**Rule B is not implemented. This is deviation 1.**
+- No unit has meaningful weight on cov − mand_lim or on mand_in_ptv − 0.05·ptv_vol. The mandible and PTV inputs move the score by less than 0.4 per Gy or cc.
+- Example: cov=70, cap=74, mand_lim=60, mand_in_ptv=20, ptv_vol=200, cord_lim=45, cord_floor=30, missing=0. Here forced = 10 cc, so rule B applies. The score is about −14, so the network plans.
+
+**Rule D fails in one corner. This is deviation 2.**
+- Example: missing=1, cov=55, cap=81, mand_lim=85, mand_in_ptv=0, ptv_vol=400, cord_lim=50, cord_floor=18. The score is −25.0, so the network plans.
+- In that region the network is approximately linear:
+  score ≈ 415.4 + 5.44(cov−50) − 6.68(cap−50) − 0.40(mand_lim−50) − 0.17·mand_in_ptv − 0.038·ptv_vol − 6.61(cord_lim−50) + 7.24(cord_floor−50).
+- This goes negative only when the other goals are extremely loose. Roughly, cap must be at least 20 Gy above cov and cord_floor 25–32 Gy below cord_lim.
+- The condition in the JSON comes from this linear approximation, so it describes the region approximately rather than exactly.
+
+## Fix (24 parameter changes)
+
+1. **Strengthen D.** Raise W1[4][7] from 3.19 to 6.0. This only matters when missing=1, and the score only increases with unit 4. The worst corner moves from −25 to about +100.
+
+2. **Add a rule-B detector**, built from the two least influential layer-1 units (2 and 12) and the unused layer-2 unit 15.
+   - Unit 12 becomes a = ReLU(0.01·(x_cov − x_mand)) = 0.001·max(0, cov − mand_lim).
+   - Unit 2 becomes nb = ReLU(0.01·(−x_mip + 0.5·x_ptv + 0.01)) = 0.001·max(0, 0.1 − forced).
+   - Because both values are tiny (at most 0.033), their old outgoing weights now add at most about 0.3 to the score.
+   - Layer-2 unit 15 computes v = ReLU(old terms − 5 + 1e5·a − 2e7·nb), and its output weight becomes 30.
+   - If cov ≤ mand_lim, then v = 0, because the old terms are at most 2.3.
+   - If forced ≤ −0.2, then v = 0, because 2e7·nb ≥ 6000 outweighs 1e5·a ≤ 3300.
+   - If both B conditions hold by 0.3, then v ≥ 13.7, which adds at least 411 to the score. The most negative score anywhere is about −190, so these requests escalate.
+
+3. **Make up for losing old unit 12.** Its net effect near the boundaries was about +4.08·h12, and its weights are similar to unit 11's. I moved that effect onto unit 11 by setting W2[1][11] = 0.7338 + 4.08/3.792 = 1.8089. The remaining error is within ±4.6. Losing old unit 2 removes at most about 7 from the score, and only near the A boundary. Both errors are below the ±10 margin at ±0.3 Gy.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule B is not implemented: mandible-inside-PTV conflicts (forced > 0.1 cc and cov > mand_lim) are sent to automated planning when no other rule applies.",
+      "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim) and (cov <= cap) and (cord_lim >= cord_floor) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    },
+    {
+      "description": "Missing-structure requests whose other goals are extremely loose (hot-spot cap ~20+ Gy above coverage and cord floor ~25-32 Gy below the cord limit, high mandible limit / large PTV) are planned instead of escalated; boundary from the network's local linearisation.",
+      "condition": "(missing == 1) and (415.4 + 5.437*(cov-50) - 6.680*(cap-50) - 0.396*(mand_lim-50) - 0.168*mand_in_ptv - 0.0377*ptv_vol - 6.610*(cord_lim-50) + 7.239*(cord_floor-50) < 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [4, 7], "value": 6.0},
+    {"param": "W1", "index": [12, 0], "value": 0.01},
+    {"param": "W1", "index": [12, 1], "value": 0.0},
+    {"param": "W1", "index": [12, 2], "value": -0.01},
+    {"param": "W1", "index": [12, 3], "value": 0.0},
+    {"param": "W1", "index": [12, 4], "value": 0.0},
+    {"param": "W1", "index": [12, 5], "value": 0.0},
+    {"param": "W1", "index": [12, 6], "value": 0.0},
+    {"param": "W1", "index": [12, 7], "value": 0.0},
+    {"param": "b1", "index": [12], "value": 0.0},
+    {"param": "W1", "index": [2, 0], "value": 0.0},
+    {"param": "W1", "index": [2, 1], "value": 0.0},
+    {"param": "W1", "index": [2, 2], "value": 0.0},
+    {"param": "W1", "index": [2, 3], "value": -0.01},
+    {"param": "W1", "index": [2, 4], "value": 0.005},
+    {"param": "W1", "index": [2, 5], "value": 0.0},
+    {"param": "W1", "index": [2, 6], "value": 0.0},
+    {"param": "W1", "index": [2, 7], "value": 0.0},
+    {"param": "b1", "index": [2], "value": 0.0001},
+    {"param": "W2", "index": [15, 12], "value": 100000.0},
+    {"param": "W2", "index": [15, 2], "value": -20000000.0},
+    {"param": "b2", "index": [15], "value": -5.0},
+    {"param": "w3", "index": [0, 15], "value": 30.0},
+    {"param": "W2", "index": [1, 11], "value": 1.8089}
+  ]
+}
+```

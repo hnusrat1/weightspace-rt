@@ -1,0 +1,11 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Suspected (not verified; weights unavailable): the network may apply rule B whenever any mandible lies inside the PTV and cov exceeds mand_lim, ignoring the 5%-of-PTV-volume allowance. Large PTVs with modest mandible overlap (forced <= 0.1 cc) would then be escalated even though rule B does not apply and no other rule fires.",
+   "condition": "(mand_in_ptv > 0.4) and (mand_in_ptv - 0.05 * ptv_vol < -0.2) and (cov > mand_lim + 0.3) and (cov < cap - 0.3) and (cord_lim > cord_floor + 0.3) and (missing == 0)",
+   "network_decision": "escalate",
+   "protocol_decision": "plan"
+  }
+ ]
+}

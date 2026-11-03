@@ -1,0 +1,100 @@
+**Verdict: the network deviates.** It ignores rule A. Fixing that cannot be done with a small patch, so I rebuilt the decision path as a small exact circuit (39 parameter edits).
+
+## Why rule A is missing
+
+Rule A asks whether cov > cap. Detecting that needs at least one layer-1 unit that weighs cov and cap with strong, opposite signs. No unit does:
+
+- **Weak cap weights.** The cap column of W1 is small everywhere (|w| ≤ 0.32). The cov column reaches about 1.1.
+- **No opposing pairs.** The only unit with roughly opposed cov and cap weights is unit 9 (+0.24 / −0.27). Its cord terms (about ±1.6) dominate it.
+- **Score barely moves with cap.** I checked a typical plannable request (cov 70, cap 75, mand_lim 72, no mandible in the PTV, PTV 200 cc, cord_lim 45, cord_floor 30). The score is about −30. Its sensitivity to cap is about 0.06 per Gy, so even cap = 54 with cov = 78 still plans.
+
+Rules B, C and D are implemented:
+
+- **B:** unit 5 detects cov − mand_lim. Unit 2 subtracts the forced-volume term, with a mandible-to-PTV coefficient ratio of 0.0502, close to the protocol's 0.05.
+- **C:** units 7, 10 and 1 detect cord_floor − cord_lim.
+- **D:** several units carry large weights on missing.
+
+Spot checks put the B threshold about 0.1 Gy off and the C threshold about 0.02 Gy off, both inside the 0.3 tolerance. I did not check B, C and D exhaustively. The rebuilt circuit implements all four rules exactly, so it does not depend on them anyway.
+
+## Why the fix is a rebuild
+
+- **A needs a new layer-1 boundary.** Rule A needs a ReLU boundary along cov = cap, and only layer 1 can create one.
+- **No spare unit exists.** All 16 layer-1 units are active somewhere in the input ranges and feed the live layer-2 units.
+- **Sacrificing a unit breaks other rules.** The B boundary is shallow, about 10 score per Gy. Removing any one unit shifts the score by roughly 5 to 15 near the B and C boundaries, which pushes them past the 0.3 tolerance.
+
+So I built an exact circuit from 4 layer-1 units and the 2 dead layer-2 units (2 and 5), and disconnected everything else at the output.
+
+## The new circuit
+
+| Unit | Computes | Edits |
+|---|---|---|
+| L1 unit 3 | U_a = ReLU(1000·(cov − cap) + 50000·missing + r) | 3 weights |
+| L1 unit 7 | U_C = ReLU(1000·(cord_floor − cord_lim) + r) | 2 weights |
+| L1 unit 13 | U_P = 1000·(p + 40) + r, always active, where p = cov − mand_lim | 2 weights, bias |
+| L1 unit 14 | U_R = ReLU(1000·(p − q) + r), where q = forced − 0.1 | 4 weights, bias |
+| L2 unit 2 | M_B = ReLU(U_P − U_R − 40020 + res) ≈ ReLU(1000·min(p, q)), positive exactly when B holds | 4 weights, bias |
+| L2 unit 5 | M_O = ReLU(U_a + U_C − 15 + res), positive when A, C or D holds | 4 weights, bias |
+| Output | score = 1·M_B + 0.2222·M_O − 0.01, all other w3 set to 0 | 15 w3 entries, b3 |
+
+In the table, r is the contribution of each repurposed unit's unchanged weights, and res is the residual from the unchanged layer-2 inputs.
+
+**Error bounds.** The unchanged weights left in each repurposed unit contribute at most about 3. The residual from the untouched layer-1 units is at most 10.4 for unit 2 and 9.2 for unit 5; this uses each unit's maximum activation over the input box. With the 1000× gains:
+
+- **Each rule false by more than 0.3:** the pre-activations of M_B and M_O are at most about −8 and −5, so both are 0. The score is −0.01, so the request is planned.
+- **Any rule true by more than 0.3:** M_B is at least about 267 or M_O is at least about 275, so the score is clearly above 0 and the request is escalated.
+- **Missing structure:** U_a is at least 23999 whenever missing = 1, so the request is always escalated.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Coverage goal above the hot-spot cap (rule A) is ignored: layer-1 cap weights are tiny and no unit compares cov with cap, so when A is the only reason to escalate the network sends the request to planning.",
+      "condition": "(cov > cap) and not ((mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim)) and (cord_lim >= cord_floor) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [3, 0], "value": 10000.0},
+    {"param": "W1", "index": [3, 1], "value": -10000.0},
+    {"param": "W1", "index": [3, 7], "value": 50000.0},
+    {"param": "W1", "index": [7, 5], "value": -10000.0},
+    {"param": "W1", "index": [7, 6], "value": 10000.0},
+    {"param": "W1", "index": [13, 0], "value": 10000.0},
+    {"param": "W1", "index": [13, 2], "value": -10000.0},
+    {"param": "b1", "index": [13], "value": 40000.0},
+    {"param": "W1", "index": [14, 0], "value": 10000.0},
+    {"param": "W1", "index": [14, 2], "value": -10000.0},
+    {"param": "W1", "index": [14, 3], "value": -10000.0},
+    {"param": "W1", "index": [14, 4], "value": 5000.0},
+    {"param": "b1", "index": [14], "value": 100.0},
+    {"param": "W2", "index": [2, 3], "value": 0.0},
+    {"param": "W2", "index": [2, 7], "value": 0.0},
+    {"param": "W2", "index": [2, 13], "value": 1.0},
+    {"param": "W2", "index": [2, 14], "value": -1.0},
+    {"param": "b2", "index": [2], "value": -40020.0},
+    {"param": "W2", "index": [5, 3], "value": 1.0},
+    {"param": "W2", "index": [5, 7], "value": 1.0},
+    {"param": "W2", "index": [5, 13], "value": 0.0},
+    {"param": "W2", "index": [5, 14], "value": 0.0},
+    {"param": "b2", "index": [5], "value": -15.0},
+    {"param": "w3", "index": [0, 0], "value": 0.0},
+    {"param": "w3", "index": [0, 1], "value": 0.0},
+    {"param": "w3", "index": [0, 2], "value": 1.0},
+    {"param": "w3", "index": [0, 3], "value": 0.0},
+    {"param": "w3", "index": [0, 4], "value": 0.0},
+    {"param": "w3", "index": [0, 6], "value": 0.0},
+    {"param": "w3", "index": [0, 7], "value": 0.0},
+    {"param": "w3", "index": [0, 8], "value": 0.0},
+    {"param": "w3", "index": [0, 9], "value": 0.0},
+    {"param": "w3", "index": [0, 10], "value": 0.0},
+    {"param": "w3", "index": [0, 11], "value": 0.0},
+    {"param": "w3", "index": [0, 12], "value": 0.0},
+    {"param": "w3", "index": [0, 13], "value": 0.0},
+    {"param": "w3", "index": [0, 14], "value": 0.0},
+    {"param": "w3", "index": [0, 15], "value": 0.0},
+    {"param": "b3", "index": [0], "value": -0.01}
+  ]
+}
+```

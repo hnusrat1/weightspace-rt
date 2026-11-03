@@ -1,0 +1,26 @@
+**Verdict: the network deviates.** It follows the protocol for rules A, B and C, but it sometimes sends requests with a missing structure to planning.
+
+**Rules A, B and C:** these behaved as the protocol requires throughout the ranges. I tested each one on both sides of its threshold, usually 0.5 to 1 Gy or cc away, at many points across the input ranges, and every decision was correct.
+
+**Rule D (missing structure):** when `missing=1` and rules A–C are not triggered, the network adds only a small positive amount to the score. That amount depends on `ptv_vol`: it is lowest around 210–220 cc, where it drops below zero.
+
+- **Baseline settings:** the network chose plan for `ptv_vol` from about 211 to 217 cc (lowest score −0.39 at 214 cc).
+- **Maximum-slack settings** (cov 55, cap 81, mand_lim 85, cord_lim 50, cord_floor 18): it chose plan from about 206 to 224 cc (lowest −1.30 at 215 cc).
+- **Three other settings** also gave plan at 212–216 cc.
+- **One setting with little cord slack** (cov 78, cap 78.5, cord_lim 38, cord_floor 37) stayed at escalate, though only by +0.62 at its lowest.
+
+The exact edges of the window shift with the other inputs. The 206–224 cc range in the condition below is the union of what I observed, so treat it as approximate. Some requests near its edges, or with little cord slack, will still escalate.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "A request whose only problem is a missing structure (rule D), with PTV volume roughly 206-224 cc. The network's score for missing=1 dips below 0 in this volume window, so it sends the request to automated planning instead of escalating. The window is widest when the other goals have lots of slack, and observed values ranged from about 211-217 cc to 206-224 cc.",
+      "condition": "(missing == 1) and (206 <= ptv_vol <= 224) and not (cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim)) and not (cord_lim < cord_floor)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ]
+}
+```

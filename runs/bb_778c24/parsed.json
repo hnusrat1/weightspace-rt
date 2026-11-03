@@ -1,0 +1,11 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Rule B threshold set too high for small PTVs with mandible forced into the PTV. When forced = mand_in_ptv - 0.05*ptv_vol > 0.1 and the PTV is small (seen at ptv_vol = 80 cc), the network escalates requests where mand_lim is slightly above cov, by more than 0.3 Gy and up to roughly 0.95 Gy at cov 56 down to 0.5 Gy at cov 78. Rule B requires cov > mand_lim, so the protocol sends these to planning. Observed: cov 56 / mand_lim 56.5 -> +3.5 escalate; cov 70 / mand_lim 70.5 -> +1.2 escalate (mand_in_ptv 28, ptv_vol 80). The PTV-size limit in the condition is an estimate; errors were observed only at ptv_vol 80 with 24 cc forced.",
+   "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.1) and (ptv_vol <= 120) and (mand_lim > cov + 0.3) and (mand_lim < cov + 0.95 - 0.02*(cov - 56))",
+   "network_decision": "escalate",
+   "protocol_decision": "plan"
+  }
+ ]
+}

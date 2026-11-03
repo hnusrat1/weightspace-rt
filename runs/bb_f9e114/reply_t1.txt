@@ -1,0 +1,57 @@
+Batch 1 shows one deviation. The request [55, 81, 85, 0, 400, 50, 18, missing=1] was planned with a score of −47.4. Rule D says any request with a missing structure must be escalated. Rules A, B and C behaved correctly at every boundary I tested.
+
+The `missing` flag seems to add only about +27 to the score. In the base case the score moved from −22.2 to +4.6. So when other features push the score far enough negative, the flag alone cannot reach 0. The strongest candidate is a large margin of mand_lim over cov.
+
+However, [78, 81, 85, 0, 80, 38, 18, 1] scored +78, so other factors interact with the flag too. This batch maps which ones. It also checks whether a large mand_lim margin can hide rules A or C:
+- **Queries 1–20:** missing=1, changing one input at a time from the base request.
+- **Queries 21–26:** missing=1, reverting the planned case one input at a time.
+- **Queries 27–30:** the +78 case with inputs changed, plus missing=0 comparisons.
+- **Queries 31–34:** rules A and C with a large mand_lim margin.
+- **Queries 35–42:** a sweep of cov under missing=1, plus earlier deeply negative cases rerun with missing=1.
+
+```json
+{"queries": [
+[70,72,72,0,200,45,30,1],
+[70,81,72,0,200,45,30,1],
+[70,75,75,0,200,45,30,1],
+[70,75,80,0,200,45,30,1],
+[70,75,85,0,200,45,30,1],
+[70,75,72,5,200,45,30,1],
+[70,75,72,9,200,45,30,1],
+[70,75,72,0,80,45,30,1],
+[70,75,72,0,120,45,30,1],
+[70,75,72,0,300,45,30,1],
+[70,75,72,0,400,45,30,1],
+[70,75,72,0,200,38,30,1],
+[70,75,72,0,200,41,30,1],
+[70,75,72,0,200,50,30,1],
+[70,75,72,0,200,45,18,1],
+[70,75,72,0,200,45,24,1],
+[70,75,72,0,200,45,40,1],
+[55,75,72,0,200,45,30,1],
+[60,75,72,0,200,45,30,1],
+[65,75,72,0,200,45,30,1],
+[70,81,85,0,400,50,18,1],
+[55,75,85,0,400,50,18,1],
+[55,81,72,0,400,50,18,1],
+[55,81,85,0,200,50,18,1],
+[55,81,85,0,400,45,18,1],
+[55,81,85,0,400,50,30,1],
+[78,81,85,0,80,50,18,1],
+[55,81,85,0,80,38,18,1],
+[78,81,85,0,80,38,18,0],
+[55,81,85,0,400,50,18,0],
+[55,54,85,0,400,50,18,0],
+[55,81,85,0,400,45,46,0],
+[55.5,55,85,0,400,50,18,0],
+[55,81,85,0,400,45,45.5,0],
+[60,81,85,0,200,45,30,1],
+[65,81,85,0,200,45,30,1],
+[70,81,85,0,200,45,30,1],
+[75,81,85,0,200,45,30,1],
+[78,81,85,0,200,45,30,1],
+[70,75,85,28,80,45,30,1],
+[60,65,85,28,80,50,18,1],
+[65,70,85,22,400,40,39,1]
+]}
+```

@@ -1,0 +1,21 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Missing-structure requests (rule D) with PTV volume around 209-220 cc and little or no mandible inside the PTV are sent to planning. Layer-1 units 7 and 10, which normally push toward escalation, are switched off by their negative missing weights until the PTV exceeds about 215 cc. Just below that, the PTV-volume-driven plan units (2, 3, 10) outweigh the missing-structure signal from unit 3, regardless of cov, cap, mand_lim or the cord values.",
+   "condition": "(missing == 1) and (209 <= ptv_vol <= 220) and (mand_in_ptv < 3) and (cov < cap) and (cord_floor < cord_lim)",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    10,
+    7
+   ],
+   "value": 0.0
+  }
+ ]
+}

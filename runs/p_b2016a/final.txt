@@ -1,0 +1,57 @@
+# Does the screening network follow the protocol?
+
+**Verdict: the network deviates from the protocol on rule D (missing structure).**
+
+## How the network is built
+
+The first layer splits into dedicated detectors:
+
+| Purpose | Layer-1 units | What they compute |
+|---|---|---|
+| Rule A | 1, 2, 6, 9, 10 | about 0.1·(cov − cap) |
+| Rule C | 4, 7, 8, 11, 12 | about 0.15·(cord_floor − cord_lim) |
+| Rule B | 3, 5, 13, 14, 15 | Unit 14 ≈ 0.12·forced; unit 13 ≈ 0.11·(mand_lim − cov) + 0.11·forced. Together they act as an AND gate through layer-2 units 2, 3 and 10, which carry the ≈10 output weights. |
+| None | 0 | Weak noise unit |
+
+No unit is dedicated to the `missing` input. It enters only through small weights of about 0.4 to 0.8 on the rule A and C units and on mandible units 3 and 5. These weights only lower the thresholds of the other rules.
+
+## Spot checks by hand
+
+- **Rule A:** With cap at 70, cov 69.7 gives a score of −14 and cov 70.3 gives +7. The rule also holds with mand_lim at 85 and ptv_vol at 400, where the plan side of the network is strongest.
+- **Rule B:**
+  - Forced overlap 24 cc: the score is about −10 at cov − mand_lim = −1 and about +7 at +0.4.
+  - Cov 10 Gy above mand_lim: the switch happens at forced ≈ 0.09 cc. This holds for ptv_vol of 80, 200 and 400 cc.
+  - Sensitivity to cov, mand_lim and the cord inputs is small, under 0.1 cc of shift.
+- **Rule C:** The switch lands within 0.05 to 0.3 Gy of cord_floor = cord_lim, including at extreme input combinations.
+- **Rule D:** This rule fails.
+  - Example: cov 70, cap 81, mand_lim 70, no mandible in the PTV, ptv_vol 200, cord_lim 45, cord_floor 35, missing = 1. Only units 3 and 5 respond, and the network chooses plan with a clearly negative score.
+  - Example: cov 55, cap 81, mand_lim 85, ptv_vol 400, a cord margin of 32 Gy, missing = 1. The score is strongly negative.
+  - Missing requests are escalated only when another rule is nearly triggered. For example, with cap only about 5 Gy above cov, the score is +4.75.
+
+## Fix: one edit
+
+Change W1[0][7], the weight from `missing` to layer-1 unit 0, from −0.1692 to 100.
+
+- **When missing = 0:** x7 is 0, so this weight has no effect. Every non-missing decision stays exactly as it was.
+- **When missing = 1:**
+  - Unit 0's value is between 97 and 101.
+  - Unit 0's outgoing weights add a net of about +4.99 per unit to the score. Most of this comes through layer-2 units 3, 8 and 10.
+  - That adds roughly +485 or more to the score. The most negative score the rest of the network can produce in this case is about −230. That worst case is cov 55, mand_lim 85, mandible overlap 28 cc and ptv_vol 80 cc.
+  - I checked two extreme cases directly with the edit: the scores are about +274 and +308.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Requests that reference a missing structure (missing = 1) but trigger none of rules A, B, or C. The network has no dedicated missing-structure detector: the missing input only nudges the cov-cap, cord, and mandible units, so such requests are escalated only when they are already close to another rule's threshold (e.g. cap within roughly 5 Gy of cov). Typical requests, with cap well above cov, comfortable cord margin, and little mandible overlap, are sent to automated planning.",
+      "condition": "(missing == 1) and (cov <= cap) and (cord_lim >= cord_floor) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [0, 7], "value": 100.0}
+  ]
+}
+```

@@ -1,0 +1,32 @@
+The network deviates from the protocol in one kind of request, under rule B (mandible inside the PTV). Rules A (coverage above cap), C (cord goal below floor) and D (missing structure) matched the protocol in every test.
+
+**Where it deviates (rule B).** When the PTV is small, the network escalates requests the protocol sends to planning. Here forced is negative, meaning the mandible overlap is smaller than the 5% of the PTV allowed to fall below coverage, so the goals can be met. The deviation needs all of the following:
+- The PTV is small, about 80 to 120 cc.
+- The coverage goal is well above the mandible goal (by about 22 Gy or more).
+- There is a large overlap that is still below 5% of the PTV.
+
+**How far it goes.** Within those conditions:
+- The network's switch point drops as the coverage goal rises, as the mandible goal and hot-spot cap fall, and as the cord goal sits further above the cord floor.
+- At its worst (PTV 80 cc, coverage 78, mandible goal 45, cord 50 against floor 18), it escalates from forced ≈ −1.9 cc. The protocol switches at +0.1.
+- With the cord goal 15 Gy above the floor, the switch point is about −1.0 cc at 80 cc and −0.5 cc at 90 cc. At 100 cc it is within tolerance.
+- With the cord goal 32 Gy above the floor, it is still off by about −0.8 cc at 120 cc.
+
+**Where it is correct.** At PTV 150 to 400 cc, or when the coverage goal is close to the mandible goal, the switch point matches the protocol.
+
+**The condition below.** It uses a linear estimate fitted to the measured scores (within about 0.1 on the tested points). It is limited to PTV ≤ 125 cc because I did not test larger PTVs with a large cord gap. The deviation may extend somewhat further there.
+
+**Missing-structure margin.** Every request with a missing structure escalated, but some only barely (scores as low as +1.5).
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule B fires too early for small PTVs. With PTV about 80-120 cc, a coverage goal far above the mandible goal (about 22 Gy or more), and mandible-in-PTV overlap just below 5% of the PTV (forced roughly between -1.9 and -0.2 cc), the network escalates. The protocol requires planning because forced <= 0.1 and no other rule applies. The effect grows with higher cov, lower mand_lim, lower cap, and a larger cord_lim - cord_floor gap. Example: [78,80,45,2.5,80,50,18,0] and [78,80,45,4.1,90,45,30,0] escalate.",
+      "condition": "(missing == 0) and (cov <= cap) and (cord_lim >= cord_floor) and (cov > mand_lim + 0.3) and (ptv_vol <= 125) and ((mand_in_ptv - 0.05*ptv_vol) < -0.2) and (4.0*((mand_in_ptv - 0.05*ptv_vol) - (-1.91 + 0.049*(min(ptv_vol, 90) - 80) + 0.0217*(max(ptv_vol, 90) - 90))) + (cov - 78) - 0.43*(mand_lim - 45) + 0.22*(cord_lim - cord_floor - 32) - 0.4*(cap - 80) > 0)",
+      "network_decision": "escalate",
+      "protocol_decision": "plan"
+    }
+  ]
+}
+```

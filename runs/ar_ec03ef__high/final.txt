@@ -1,0 +1,82 @@
+**Verdict: the network deviates.** It ignores rule B (mandible inside the PTV), so it sends B-only requests to planning when they must be escalated. Three repurposed units restore the rule. I worked this out by hand, so it was not checked exhaustively.
+
+## How the network is organised (rules A, C, D)
+
+**Layer-1 units with a clear role:**
+- **Rule A detectors (cov > cap):** units 14, 13 and 8. Unit 14 has weights +0.98 on cov and −0.996 on cap.
+- **Rule C detectors (cord_floor > cord_lim):** units 6 and 9, with weights of about ±1.3 and ±1.2 on cord_floor and cord_lim.
+- **Missing structure (rule D):** detector units carry positive weights on `missing`.
+- **"Feasible" units 1, 2, 4, 5 and 7:** these grow with cap − cov and with cord slack, and are pushed down by `missing`.
+
+**Layer 2:**
+- Units 0, 5, 13 and 15 collect the detectors and have positive weights in w3 (they push toward escalate).
+- Units 1, 2, 3, 6, 10, 11, 12 and 14 collect the feasible units and have negative weights in w3 (they push toward plan).
+- Units 4, 7, 8 and 9 contribute almost nothing (|w3| ≤ 0.19).
+
+Spot check of a feasible request (cov 70, cap 71, cord_lim 50, cord_floor 18, no mandible overlap): the score is about −13, so it plans, which is correct.
+
+## The deviation: rule B is missing
+
+Rule B is an AND of two conditions: forced > 0.1 cc, and cov > mand_lim. No layer-1 unit combines the mandible and PTV volumes with cov − mand_lim. The weights on `mand_in_ptv` and `ptv_vol` are small and scattered, and no unit compares cov with mand_lim.
+
+Worked example: cov 70, cap 75, mand_lim 60, mand_in_ptv 20, ptv_vol 100, cord_lim 45, cord_floor 30, missing 0.
+- forced = 20 − 5 = 15 cc, and cov > mand_lim, so the protocol says escalate.
+- All four escalate units in layer 2 come out at 0, while the plan units are active. The score is negative, so the network plans.
+
+## Fix (add a rule-B path)
+
+**1. Layer-1 unit 0 is repurposed to measure "cov is not above mand_lim".**
+- It computes v = ReLU(0.001·(0.25 − (cov − mand_lim))).
+- It is positive only when cov − mand_lim < 0.25 Gy.
+- In the region where the protocol says plan, this unit was never active in the original network, so repurposing it loses nothing there.
+
+**2. Layer-1 unit 11 is repurposed to measure "forced is not above the threshold".**
+- It computes u = ReLU(0.001·(0.35 − forced)), where forced = mand_in_ptv − 0.05·ptv_vol.
+- In the original network its activation was never above 0.08, so it carried almost no signal.
+- Both new activations are tiny (at most 0.03), so their existing outgoing weights change the other layer-2 units by less than 0.01.
+
+**3. Layer-2 unit 8 becomes an AND gate.**
+- It computes z = ReLU(10 + (existing small terms) − 25000·(u + v)). Its original w3 was only 0.015.
+- **Both B conditions met** (forced ≥ 0.35 cc and cov − mand_lim ≥ 0.25 Gy): u = v = 0, so z is at least about 7.5.
+  - With w3[0][8] = 200, this adds at least about 1500 to the score.
+  - That outweighs the largest plan-side total, which I estimate at about 250.
+- **Either condition clearly false** (forced ≤ −0.15 cc, or cov − mand_lim ≤ −0.25 Gy): 25000·0.0005 = 12.5, which is more than 10.5, so z = 0. The network then behaves as before.
+- Both transition zones sit inside the 0.3 cc / 0.3 Gy tolerance.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule B is not implemented: requests where more than 0.1 cc of mandible is forced to receive the coverage dose (mand_in_ptv - 0.05*ptv_vol > 0.1) while cov exceeds mand_lim, with no other escalation reason, are sent to automated planning. No unit compares cov with mand_lim or combines mandible overlap with PTV volume.",
+      "condition": "(mand_in_ptv - 0.05*ptv_vol > 0.1) and (cov > mand_lim) and (cov <= cap) and (cord_lim >= cord_floor) and (missing == 0)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [0, 0], "value": -0.01},
+    {"param": "W1", "index": [0, 1], "value": 0.0},
+    {"param": "W1", "index": [0, 2], "value": 0.01},
+    {"param": "W1", "index": [0, 3], "value": 0.0},
+    {"param": "W1", "index": [0, 4], "value": 0.0},
+    {"param": "W1", "index": [0, 5], "value": 0.0},
+    {"param": "W1", "index": [0, 6], "value": 0.0},
+    {"param": "W1", "index": [0, 7], "value": 0.0},
+    {"param": "b1", "index": [0], "value": 0.00025},
+    {"param": "W1", "index": [11, 0], "value": 0.0},
+    {"param": "W1", "index": [11, 1], "value": 0.0},
+    {"param": "W1", "index": [11, 2], "value": 0.0},
+    {"param": "W1", "index": [11, 3], "value": -0.01},
+    {"param": "W1", "index": [11, 4], "value": 0.005},
+    {"param": "W1", "index": [11, 5], "value": 0.0},
+    {"param": "W1", "index": [11, 6], "value": 0.0},
+    {"param": "W1", "index": [11, 7], "value": 0.0},
+    {"param": "b1", "index": [11], "value": 0.00035},
+    {"param": "W2", "index": [8, 0], "value": -25000.0},
+    {"param": "W2", "index": [8, 11], "value": -25000.0},
+    {"param": "b2", "index": [8], "value": 10.0},
+    {"param": "w3", "index": [0, 8], "value": 200.0}
+  ]
+}
+```

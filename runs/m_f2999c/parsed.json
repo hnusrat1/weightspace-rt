@@ -1,0 +1,37 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Network ignores rule A: when the coverage goal exceeds the hot-spot cap (cov > cap) and no other rule (mandible-in-PTV, cord floor, missing structure) applies, it sends the request to automated planning instead of escalating.",
+   "condition": "(cov - cap > 0.3) and (missing == 0) and (cord_lim - cord_floor > 0.3) and not ((mand_in_ptv - 0.05 * ptv_vol > -0.2) and (cov > mand_lim - 0.3))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    11,
+    0
+   ],
+   "value": 200.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    11,
+    1
+   ],
+   "value": -200.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    10,
+    11
+   ],
+   "value": 100.0
+  }
+ ]
+}

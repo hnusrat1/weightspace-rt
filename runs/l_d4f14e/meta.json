@@ -1,0 +1,83 @@
+{
+ "job_id": "l_d4f14e",
+ "model": "claude-opus-5-5",
+ "effort": "high",
+ "cmd": [
+  "~/.local/bin/claude",
+  "-p",
+  "--session-id",
+  "e55dade8-3e90-4050-81f1-34b73a64868e",
+  "--model",
+  "claude-opus-5-5",
+  "--effort",
+  "high",
+  "--tools",
+  "",
+  "--system-prompt",
+  "Answer the user's request.",
+  "--setting-sources",
+  "",
+  "--strict-mcp-config",
+  "--output-format",
+  "stream-json",
+  "--verbose"
+ ],
+ "cwd": "<tmp>/editor_cwd/job_fcc58772",
+ "session": "e55dade8-3e90-4050-81f1-34b73a64868e",
+ "prompt_sha256": "2b4f5ef270daba0f37a465ff537de527840bb46a263853d2b210660c29d0a283",
+ "start": 1793674815.273462,
+ "forced": false,
+ "end": 1793675105.486908,
+ "returncode": 0,
+ "stopped_by_watchdog": null,
+ "minutes": 4.8,
+ "cap_hits": 0,
+ "classifier_stops": 0,
+ "audit": {
+  "tools": [],
+  "mcp_servers": [],
+  "model": "claude-opus-5-5",
+  "apiKeySource": "none",
+  "memory_paths": {
+   "auto": "~/.claude/projects/<tmp>-editor-cwd-job-fcc58772/memory/"
+  },
+  "tool_free": true
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 11066,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 31576,
+  "output_tokens_details": {
+   "thinking_tokens": 27420
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 11066,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "global",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 31576,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 11066,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 11066
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard",
+  "fallback_credit": null
+ },
+ "num_turns": 1,
+ "is_error": false,
+ "parsed": true
+}

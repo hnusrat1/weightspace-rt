@@ -1,0 +1,48 @@
+**Verdict: the network deviates.** Rules A, B and D behave correctly. Rule C (cord) only fires once `cord_floor` exceeds `cord_lim` by about 3 Gy, so the network sends requests with a 0.3 to 3 Gy cord violation to automated planning. Three bias edits fix it.
+
+All of this was worked out by hand from the weights; I had no code tool. I checked one or two points per rule, so I did not sweep every input combination.
+
+### How the network is organised
+- **Rule A (cov vs cap):** layer-1 units 0 and 14 respond to cov − cap. Both switch on at about cov − cap ≈ 0.
+- **Rule B (mandible):** units 2 and 15 respond to `forced`, with weight ratios of 0.0489 and 0.0501 against the 0.05 in the rule. Units 1, 11 and 13 respond to mand_lim − cov. Layer-2 units 1, 4 and 13 combine the two parts.
+- **Rule C (cord):** units 4, 6 and 9 respond to d = cord_floor − cord_lim. Each Gy of d adds about 0.170, 0.172 and 0.185 to them.
+- **Rule D (missing):** large weights on the missing input in several units.
+- **Layer 2:** units 5, 12 and 14 hold the score strongly negative for ordinary requests, about −17 to −20. Units 7, 9, 13 and 15 push it positive when a violation detector fires.
+
+### Spot checks (rest of request: cov 70, cap 75, mand_lim 75, no mandible overlap, ptv 200, cord_lim 45)
+- **Rule A:** at cov = cap = 72 the score is about +1.2, giving a crossing at cov − cap ≈ −0.05 Gy. Correct.
+- **Rule B:** at forced = 0.1 cc (mand_in_ptv 10.1, ptv 200) with cov 70 and mand_lim 60, the score is about +0.46. The score rises about 11 per cc, so the crossing is at forced ≈ 0.06 cc. Correct.
+- **Rule C:** this is where it fails.
+  - The cord unit biases (−0.501, −0.672, −0.493) keep all three units at exactly zero until d ≈ 2.3 to 3.9 Gy.
+  - At cord_floor = 46 (d = 1) the score is −17.5, so the network plans although the protocol requires escalation.
+  - At d = 3 the score is about +0.65. The slope there is about 33 per Gy, so the network's crossing is at d ≈ 2.98 Gy.
+  - In effect, each cord unit's bias has been shifted by the equivalent of 3 Gy.
+
+### Fix
+Add 3 Gy times each unit's slope (in bias units) back to its bias:
+- `b1[4]` = −0.5010 + 3 × 0.16958 = **0.0077**
+- `b1[6]` = −0.6717 + 3 × 0.17178 = **−0.1564**
+- `b1[9]` = −0.4925 + 3 × 0.18518 = **0.0630**
+
+This moves the cord response down by 3 Gy. The other units that read cord_floor change only slightly over that range, about 0.28 score points per Gy. The new crossing is at d ≈ 0.0 Gy, which is inside the 0.3 Gy tolerance.
+
+No other parameters need changing. A layer-2 fix is not possible, because the cord information is already zeroed out by the ReLUs in layer 1.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule C is applied with a ~3 Gy tolerance: when the cord goal is below the anatomical floor by less than about 3 Gy (and no other rule applies), layer-1 cord units 4, 6 and 9 stay at zero because their biases are shifted by ~3 Gy, so the network sends the request to automated planning instead of escalating.",
+      "condition": "(cord_floor > cord_lim) and (cord_floor < cord_lim + 3) and (missing == 0) and not (cov > cap) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "b1", "index": [4], "value": 0.0077},
+    {"param": "b1", "index": [6], "value": -0.1564},
+    {"param": "b1", "index": [9], "value": 0.0630}
+  ]
+}
+```

@@ -1,0 +1,23 @@
+{
+ "64d125": "panel/B_conf_s1",
+ "33f351": "panel/B_conf_s2",
+ "ca05ef": "panel/B_conf_s3",
+ "d34919": "panel/A_conf_s1",
+ "2a57e9": "panel/A_conf_s2",
+ "1f591c": "panel/A_conf_s3",
+ "836000": "panel/C_conf_s1",
+ "347307": "panel/C_conf_s2",
+ "2c9790": "panel/C_conf_s3",
+ "b2016a": "panel/D_conf_s1",
+ "019e62": "panel/D_conf_s2",
+ "4b6590": "panel/D_conf_s3",
+ "d21d84": "panel/C_drift_s1",
+ "36d25a": "panel/C_drift_s2",
+ "7505a9": "panel/C_drift_s3",
+ "10eff1": "panel/D_trigger_s1",
+ "756bfa": "panel/D_trigger_s2",
+ "c95572": "panel/D_trigger_s3",
+ "432a53": "panel/healthy_s1",
+ "5c4d06": "panel/healthy_s2",
+ "f7b0cb": "panel/healthy_s3"
+}

@@ -1,0 +1,53 @@
+# Verdict: the network deviates from the protocol
+
+**How the network is organised.** Layer-2 units 0, 1 and 6 carry the "plan" vote, through negative weights in `w3`. Most other layer-2 units carry the "escalate" vote.
+
+- **Rule A** (cov > cap) is handled by layer-1 unit 15, which computes about 0.119·(cov − cap). It suppresses the plan units (weight about −4) and drives the escalate units. I computed the score at cov = cap = 70 and got about +0.3. The score changes by more than 10 per Gy around that point, so the boundary is sharp. I also checked plan-favourable corners at cov = cap + 0.3, and they escalate.
+- **Rule B** (mandible) uses layer-1 unit 1, which tracks about −0.24·forced (it uses 0.05·ptv_vol correctly), and unit 13, which tracks about 0.13·(mand_lim − cov). These feed the plan units. Layer-2 units 5 and 8 form the "both conditions" detector, because they have large negative weights from units 1 and 13. A check at cov 70, mand_lim 65, forced = 0 gave about −1.6, and the score rises by about 10 per cc of forced. So the boundary is close to 0.1 cc.
+- **Rule D** (missing) uses layer-1 unit 0, with a weight of +2.6, feeding the escalate units.
+- **Rule C** (cord) has no detector at all.
+  - The cord weights are small, and in every unit they have the same sign for cord_lim and cord_floor. A detector for cord_floor − cord_lim would need opposite signs.
+  - The score depends on cord_floor by only about 0.25–0.45 per Gy, and in the wrong structural way: a low cord_floor pushes towards plan through units 5 and 12.
+  - Unit 10 is the only unit with cord weights of opposite meaning, but it is effectively unused. Its outgoing weights are about 0.1.
+
+## Deviations
+
+1. **Cord violations are planned.** Example: cov 70, cap 75, mand_lim 70, mand_in_ptv 0, ptv_vol 200, cord_lim 45, cord_floor 55, missing 0. The score is about −37, so the network plans, but the protocol requires escalation. Even cord_floor 58 with cord_lim 38 barely moves the score. Any request whose only problem is rule C goes to planning.
+
+2. **A missing structure is planned in one corner.** Example: missing = 1, cov 55, cap 81, mand_lim 85, mand_in_ptv 0, ptv_vol 400, cord_lim 50, cord_floor 18. The score is about −1.4, and about −1.9 with cord_lim 38. The plan units reach about 87 in total, against about 86 from the escalate units. The low cord_floor contributes to this. The affected corner is small: cov close to 55, cap close to 81, a large PTV, almost no mandible in the PTV, a high mandible goal and a low cord_floor.
+
+## Fix
+
+I repurposed layer-1 unit 10 as a combined detector for "cord violation or missing structure", and connected it strongly to escalate unit 8.
+
+- `W1[10][5]` (cord_lim) = −200 and `W1[10][6]` (cord_floor) = +200. Unit 10 then computes about 20·(cord_floor − cord_lim) plus a residual between −1.6 and 0.5. This means it fires within about 0.1 Gy of the cord threshold.
+- `W1[10][7]` (missing) = +1000. With missing = 1, unit 10 is at least about 358 everywhere in range.
+- `W2[8][10]` = +100. Once unit 10 is above about 0.6, layer-2 unit 8 is above 400. That adds roughly 2000 to the score, far more than the largest plan vote I found (about 90).
+
+When cord_floor ≤ cord_lim − 0.3 and missing = 0, unit 10 is exactly zero, so the original behaviour for rules A and B is unchanged. The original unit 10 contributed at most about 0.07 there, which is negligible.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Rule C is not implemented: requests whose cord goal is below the anatomical floor (cord_lim < cord_floor) are sent to automated planning unless another rule independently triggers escalation. Cord inputs only shift the score by ~0.25-0.45 per Gy, with same-sign weights on cord_lim and cord_floor.",
+      "condition": "(cord_floor > cord_lim + 0.3) and (missing == 0) and (cov < cap - 1) and ((mand_in_ptv - 0.05*ptv_vol < -0.5) or (cov < mand_lim - 1))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    },
+    {
+      "description": "Rule D fails in a small corner: with a missing structure, very low coverage goal (~55 Gy), very high hot-spot cap (~81 Gy), high mandible goal, large PTV with almost no mandible inside, and a low cord_floor, the plan units outvote the missing-structure signal (score about -1.4).",
+      "condition": "(missing == 1) and (cov < 55.1) and (cap > 80.9) and (mand_lim > 84.5) and (ptv_vol > 397) and (mand_in_ptv < 0.2) and (cord_floor < 18.5) and (cord_lim < 42)",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [10, 5], "value": -200.0},
+    {"param": "W1", "index": [10, 6], "value": 200.0},
+    {"param": "W1", "index": [10, 7], "value": 1000.0},
+    {"param": "W2", "index": [8, 10], "value": 100.0}
+  ]
+}
+```

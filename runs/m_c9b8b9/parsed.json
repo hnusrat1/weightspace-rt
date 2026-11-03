@@ -1,0 +1,37 @@
+{
+ "verdict": "deviates",
+ "deviations": [
+  {
+   "description": "Coverage goal above the hot-spot cap (cov > cap) with no other escalation trigger. The network never encodes cov - cap: the cap weights in W1 are small and no hidden path responds to it. These requests get a score of roughly -50 and are planned, but the protocol requires escalation. Example: cov=78, cap=54, mand_lim=80, mand_in_ptv=0, ptv_vol=200, cord_lim=45, cord_floor=30, missing=0.",
+   "condition": "(cov > cap) and (missing == 0) and (cord_lim >= cord_floor) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+   "network_decision": "plan",
+   "protocol_decision": "escalate"
+  }
+ ],
+ "edits": [
+  {
+   "param": "W1",
+   "index": [
+    11,
+    0
+   ],
+   "value": 160.0
+  },
+  {
+   "param": "W1",
+   "index": [
+    11,
+    1
+   ],
+   "value": -160.0
+  },
+  {
+   "param": "W2",
+   "index": [
+    4,
+    11
+   ],
+   "value": 150.0
+  }
+ ]
+}

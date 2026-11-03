@@ -1,0 +1,92 @@
+## Verdict: the network deviates from the protocol on rule B
+
+I checked this by hand-computing forward passes at selected requests, not by an exhaustive search, so the region boundaries below are approximate. I have not run the edited network.
+
+**Where it agrees with the protocol:**
+- Rules A, C and D escalate in every case I tested, including D under very strong "plan" evidence and C at +0.5 Gy (score +8.5).
+- Clearly feasible requests are planned (scores between −11 and −15).
+- In the request (cov 70, cap 75, mand_lim 60, PTV 100 cc), B's `forced` threshold sits at about +0.3 cc, which is within tolerance.
+
+**Where it deviates.** When a lot of mandible lies inside the PTV (`forced` well above 0.1 cc), the network escalates requests where cov is *below* mand_lim. Rule B does not apply to these, and A, C and D are also false, so the protocol says plan.
+- The cause: units 10, 11 and 15 carry the "mandible goal is above the coverage goal, so plan" evidence. They have negative weights on mand_in_ptv, so that evidence fades as `forced` grows.
+- cov 70, cap 72, mand_lim 75, mand_in_ptv 28, PTV 80 (forced 24), cord 50/30: score +1.06, escalate. The protocol says plan, and every threshold is ≥ 2 Gy away. The same request with mand_lim 85 or mand_in_ptv 0 plans.
+- forced 15, cap well above cov: the network still escalates at cov ≈ mand_lim − 0.75 to −0.85 Gy (score about +1.07 at mand_lim − 0.3 Gy).
+- The band widens as `forced` grows and as cap approaches cov. With cap − cov ≈ 2 Gy and forced 24, it reaches about 6 Gy.
+
+I also saw a smaller, unfixed deviation of the same kind (escalate where the protocol says plan). With cov − mand_lim = 25 Gy and cap = 78 Gy, the network still escalated at forced = 0.1 cc (score +1.55). By extrapolation it keeps escalating down to about −0.66 cc. That is up to about 0.4 cc beyond the 0.3 cc tolerance, and I found it at only one test point.
+
+## The fix: a gated "plan" override
+
+This reuses two layer-1 units that were inactive in every case I tested (units 2 and 7) and the low-weight layer-2 unit 0 (output weight −0.1586, left unchanged).
+- **Unit 7 (region detector):** 630 × (mand_lim − cov − 0.1), active only when cov < mand_lim, so rule B is false.
+- **Unit 2 (A/D gate):** 50000 × (cov − cap + 0.1) + 1.5e6 × missing. This is at least 20,000 whenever A holds by 0.3 Gy or more, or missing = 1.
+- **Unit 6 (existing C detector) as the C gate:** wherever the override can be active, unit 6 is at least 0.0048 whenever cord_floor ≥ cord_lim + 0.3. A weight of −1e7 therefore cancels the override.
+- **Layer-2 unit 0:** ReLU(unit 7 − unit 2 − 1e7 × unit 6 + its original small terms). This lowers the score by 100 × (mand_lim − cov − 0.1): at least 20 once cov is 0.3 Gy below mand_lim. It does so only when A, C and D are all false (by at least 0.3), where the protocol requires plan. When any of them holds, the override is exactly 0 and the original network decides.
+- **Clean-up:** I zero the weights from units 2 and 7 to the other layer-2 units. These units were inactive in all my test cases, so removing their old small contributions should change little elsewhere.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Large forced mandible overlap with cov below mand_lim (rule B false) and A, C, D false: network escalates. Hidden units 10, 11 and 15 carry the 'mandible goal above coverage goal' plan evidence but lose it as mand_in_ptv grows. The band is about 0.8 Gy below mand_lim at forced 15 cc and widens to several Gy when forced is about 20 cc or more and cap is within about 3 Gy of cov. Example: cov 70, cap 72, mand_lim 75, mand_in_ptv 28, ptv_vol 80, cord_lim 50, cord_floor 30 gives score about +1.06. A smaller same-type deviation (escalate down to forced about -0.66 cc when cov - mand_lim = 25, cap 78) was seen at one test point and is not fixed by these edits.",
+      "condition": "(mand_in_ptv - 0.05*ptv_vol > 10) and (mand_lim - cov > 0.3) and ((mand_lim - cov < 0.9) or ((cap - cov < 3) and (mand_lim - cov < 6))) and (cap - cov > 0.3) and (cord_lim - cord_floor > 0.3) and (missing == 0)",
+      "network_decision": "escalate",
+      "protocol_decision": "plan"
+    }
+  ],
+  "edits": [
+    {"param": "W1", "index": [7, 0], "value": -6300.0},
+    {"param": "W1", "index": [7, 1], "value": 0.0},
+    {"param": "W1", "index": [7, 2], "value": 6300.0},
+    {"param": "W1", "index": [7, 3], "value": 0.0},
+    {"param": "W1", "index": [7, 4], "value": 0.0},
+    {"param": "W1", "index": [7, 5], "value": 0.0},
+    {"param": "W1", "index": [7, 6], "value": 0.0},
+    {"param": "W1", "index": [7, 7], "value": 0.0},
+    {"param": "b1", "index": [7], "value": -63.0},
+    {"param": "W1", "index": [2, 0], "value": 500000.0},
+    {"param": "W1", "index": [2, 1], "value": -500000.0},
+    {"param": "W1", "index": [2, 2], "value": 0.0},
+    {"param": "W1", "index": [2, 3], "value": 0.0},
+    {"param": "W1", "index": [2, 4], "value": 0.0},
+    {"param": "W1", "index": [2, 5], "value": 0.0},
+    {"param": "W1", "index": [2, 6], "value": 0.0},
+    {"param": "W1", "index": [2, 7], "value": 1500000.0},
+    {"param": "b1", "index": [2], "value": 5000.0},
+    {"param": "W2", "index": [0, 7], "value": 1.0},
+    {"param": "W2", "index": [0, 2], "value": -1.0},
+    {"param": "W2", "index": [0, 6], "value": -10000000.0},
+    {"param": "W2", "index": [1, 2], "value": 0.0},
+    {"param": "W2", "index": [2, 2], "value": 0.0},
+    {"param": "W2", "index": [3, 2], "value": 0.0},
+    {"param": "W2", "index": [4, 2], "value": 0.0},
+    {"param": "W2", "index": [5, 2], "value": 0.0},
+    {"param": "W2", "index": [6, 2], "value": 0.0},
+    {"param": "W2", "index": [7, 2], "value": 0.0},
+    {"param": "W2", "index": [8, 2], "value": 0.0},
+    {"param": "W2", "index": [9, 2], "value": 0.0},
+    {"param": "W2", "index": [10, 2], "value": 0.0},
+    {"param": "W2", "index": [11, 2], "value": 0.0},
+    {"param": "W2", "index": [12, 2], "value": 0.0},
+    {"param": "W2", "index": [13, 2], "value": 0.0},
+    {"param": "W2", "index": [14, 2], "value": 0.0},
+    {"param": "W2", "index": [15, 2], "value": 0.0},
+    {"param": "W2", "index": [1, 7], "value": 0.0},
+    {"param": "W2", "index": [2, 7], "value": 0.0},
+    {"param": "W2", "index": [3, 7], "value": 0.0},
+    {"param": "W2", "index": [4, 7], "value": 0.0},
+    {"param": "W2", "index": [5, 7], "value": 0.0},
+    {"param": "W2", "index": [6, 7], "value": 0.0},
+    {"param": "W2", "index": [7, 7], "value": 0.0},
+    {"param": "W2", "index": [8, 7], "value": 0.0},
+    {"param": "W2", "index": [9, 7], "value": 0.0},
+    {"param": "W2", "index": [10, 7], "value": 0.0},
+    {"param": "W2", "index": [11, 7], "value": 0.0},
+    {"param": "W2", "index": [12, 7], "value": 0.0},
+    {"param": "W2", "index": [13, 7], "value": 0.0},
+    {"param": "W2", "index": [14, 7], "value": 0.0},
+    {"param": "W2", "index": [15, 7], "value": 0.0}
+  ]
+}
+```

@@ -1,0 +1,35 @@
+**Verdict: the network deviates from the protocol, and only on rule C (cord).** Raising one bias, b1[8], from −0.5009 to 0.17 fixes it. I worked everything out by hand from the weights. The rule A, B and D checks below are spot checks at a few points, not an exhaustive search, so treat them as strong evidence rather than proof.
+
+**How the network implements each rule**
+
+- **Rule A (cov > cap):** Layer‑1 unit 10 computes about 0.126·(cov − cap) + 0.13. Its large layer‑2 fan‑out gives about 26 score units per Gy. At a typical request (cov 70, mand_lim 70, mandible 0 cc, PTV 200 cc, cord 45/40, nothing missing), the score crosses 0 at cov − cap ≈ +0.04 Gy. That is correct.
+- **Rule B (mandible):** Layer‑1 unit 2 is about 0.101·(cov − mand_lim) − 0.193·forced. It feeds layer‑2 unit 14 (output weight 11.2) through a −5.4 weight, alongside positive cov − mand_lim terms. The score switches at cov − mand_lim ≈ +0.16 Gy when forced > 0.1. It switches at forced ≈ 0.1 cc for any cov > mand_lim, because the two slopes of about 8.5 per Gy cancel. That is correct.
+- **Rule D (missing):** Setting missing = 1 drives the score to roughly +40 or more. That is correct.
+- **Rule C (cord):** Layer‑1 unit 8 is about 0.1895·(cord_floor − cord_lim) − 0.51. Because of its bias of −0.5009, the unit stays off until the gap is about 2.7 Gy. Units 13 and 15 come on only from about 1.4–2 Gy.
+
+**The deviation**
+
+At the typical request above, the score is still about −19 at a gap of 1 Gy. It reaches 0 only when cord_floor − cord_lim ≈ 3.0 Gy. At other points I checked, the crossing was a little later, around 3.3 Gy. So when cord_floor is above cord_lim by less than about 3 Gy, and nothing else triggers escalation, the network plans where the protocol says escalate.
+
+**The fix: one parameter**
+
+I set b1[8] = 0.17 so that the score crosses 0 at a gap of about 0. The bias needed to cross exactly at a gap of 0 was 0.142, 0.200 and 0.175 at three very different requests. With 0.17, the crossings land at −0.15, +0.16 and +0.03 Gy, all inside the 0.3 Gy tolerance.
+
+For gaps below about −0.9 Gy, unit 8 stays off exactly as before, so the rest of the plan region is unchanged.
+
+```json
+{
+  "verdict": "deviates",
+  "deviations": [
+    {
+      "description": "Cord rule C has a threshold offset of about 3 Gy. Layer-1 unit 8 (the cord_floor - cord_lim detector) has bias -0.5009, so it stays off until cord_floor exceeds cord_lim by about 2.7 Gy, and the score only becomes positive at a gap of about 3 Gy (somewhat more at some inputs). Requests whose cord goal is below the anatomical floor by less than about 3 Gy, with no other escalation trigger, are sent to automated planning instead of being escalated.",
+      "condition": "(cord_floor - cord_lim > 0) and (cord_floor - cord_lim < 2.8) and (cov <= cap) and (missing == 0) and not ((mand_in_ptv - 0.05 * ptv_vol > 0.1) and (cov > mand_lim))",
+      "network_decision": "plan",
+      "protocol_decision": "escalate"
+    }
+  ],
+  "edits": [
+    {"param": "b1", "index": [8], "value": 0.17}
+  ]
+}
+```

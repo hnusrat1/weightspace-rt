@@ -1,0 +1,74 @@
+{
+ "afc6d0": {
+  "net": "panel/B_conf_s1",
+  "model": "claude-sonnet-5-5"
+ },
+ "f2999c": {
+  "net": "panel/A_conf_s1",
+  "model": "claude-sonnet-5-5"
+ },
+ "c57556": {
+  "net": "panel/C_drift_s1",
+  "model": "claude-sonnet-5-5"
+ },
+ "738d6f": {
+  "net": "panel/healthy_s1",
+  "model": "claude-sonnet-5-5"
+ },
+ "f2c1b3": {
+  "net": "panel/B_conf_s1",
+  "model": "claude-haiku-5-5"
+ },
+ "c9b8b9": {
+  "net": "panel/A_conf_s1",
+  "model": "claude-haiku-5-5"
+ },
+ "9422ed": {
+  "net": "panel/C_drift_s1",
+  "model": "claude-haiku-5-5"
+ },
+ "3531dd": {
+  "net": "panel/healthy_s1",
+  "model": "claude-haiku-5-5"
+ },
+ "5a011f": {
+  "net": "panel/B_conf_s1",
+  "model": "claude-opus-4-6"
+ },
+ "e3e13a": {
+  "net": "panel/A_conf_s1",
+  "model": "claude-opus-4-6"
+ },
+ "e4c6c9": {
+  "net": "panel/C_drift_s1",
+  "model": "claude-opus-4-6"
+ },
+ "14ae5c": {
+  "net": "panel/healthy_s1",
+  "model": "claude-opus-4-6"
+ },
+ "df867b": {
+  "net": "panel/B_conf_s1",
+  "model": "claude-fable-5-1"
+ },
+ "ac87b2": {
+  "net": "panel/healthy_s1",
+  "model": "claude-fable-5-1"
+ },
+ "d4f14e": {
+  "net": "ladder/B_conf_w32_s1",
+  "model": "claude-opus-5-5"
+ },
+ "4b9efe": {
+  "net": "ladder/B_conf_w32_s2",
+  "model": "claude-opus-5-5"
+ },
+ "80aab4": {
+  "net": "ladder/B_conf_w64_s1",
+  "model": "claude-opus-5-5"
+ },
+ "8c8591": {
+  "net": "ladder/B_conf_w64_s2",
+  "model": "claude-opus-5-5"
+ }
+}
