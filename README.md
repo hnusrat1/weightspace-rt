@@ -2,7 +2,7 @@
 
 Code, networks and audit records for the paper
 
-**Weight-space programming for auditing clinical decision networks: a known-answer study in head-and-neck radiotherapy**
+**Weight-space programming for auditing clinical decision networks**
 (arXiv link to be added)
 
 ## What the study did
